@@ -1,7 +1,6 @@
 from wallace.db.base.attrs import DataType
 from wallace.db.base.errors import DoesNotExist, ValidationError
 from wallace.db.base.model import Base, Model
-from wallace.errors import ProgrammingError
 
 
 class _PKBase(Base):
@@ -11,7 +10,7 @@ class _PKBase(Base):
 
         if cls._is_proper_model(bases):
             if not the_class._cbs_primary_key_fields:
-                raise ProgrammingError('no primary keys set')
+                raise TypeError('no primary keys set')
 
         return the_class
 

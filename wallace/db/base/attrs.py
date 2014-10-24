@@ -1,7 +1,6 @@
 import time
 
 from wallace.db.base.errors import ValidationError
-from wallace.errors import ProgrammingError
 
 
 class _Interface(object):
@@ -29,10 +28,10 @@ class _ValidationMixin(object):
     @staticmethod
     def _check_validators(validators):
         if not isinstance(validators, (list, tuple,)):
-            raise ProgrammingError('validators not iterable')
+            raise TypeError('validators not iterable')
         for validator in validators:
             if not hasattr(validator, '__call__'):
-                raise ProgrammingError('validator not callable')
+                raise TypeError('validator not callable')
 
     def __init__(self, validators):
         if validators:
