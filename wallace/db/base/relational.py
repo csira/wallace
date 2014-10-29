@@ -25,20 +25,19 @@ class _PKBase(Base):
         for key, val in dct.iteritems():
             if isinstance(val, DataType) and val.is_pk:
                 pk_fields.add(key)
-            elif key in pk_fields:      # catch a superclass's pk field
+            elif key in pk_fields:      # catch a superclass's pk field that's
                 pk_fields.remove(key)   # overridden here by a non-pk one
 
         return tuple(pk_fields)
 
     @staticmethod
     def _is_proper_model(bases):
-        """
-        Model hierarchy:
-            <model> -> <DB model wrapper (eg PostgresModel)> ->
-            RelationalModel -> Model -> object
-        ergo, the hierarchy cardinality for any proper model subclass
-        will be at least 4
-        """
+        # Model hierarchy:
+        #     <model> -> <DB model wrapper (eg PostgresModel)> ->
+        #     RelationalModel -> Model -> object
+        # ergo, the hierarchy cardinality for any proper model subclass
+        # will be at least 4
+
         base_tree = []
         while bases:
             base_tree.append(bases)
@@ -84,11 +83,10 @@ class RelationalModel(Model):
 
     @property
     def primary_key(self):
-        """
-        The primary key CURRENTLY stored in the db. Ie, if a pk field is
-        changed, this will continue to return the old value so updates can
-        find the row.
-        """
+        # The primary key CURRENTLY stored in the db.
+        # If a pk field is changed, this will continue to return the old value
+        # so updates can find the row.
+
         if self.is_new:
             raise DoesNotExist('new model')
 

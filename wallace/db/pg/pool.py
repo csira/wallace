@@ -13,12 +13,10 @@ class PostgresPool(ThreadedConnectionPool):
 
 
     def getconn(self, autocommit=True, **kwargs):
-        """
-        Since any query begins a transaction when autocommit=False, the
-        session wrapped by this connection will remain 'idle in tx'
-        (potentially hang on to locks, etc.) until the caller commits.
-        Hence, we're defaulting to autocommit=True.
-        """
+        # Since any query begins a transaction when autocommit=False, the
+        # session wrapped by this connection will remain 'idle in tx'
+        # (potentially hang on to locks, etc.) until the caller commits.
+        # Hence, we're defaulting to autocommit=True.
         conn = super(PostgresPool, self).getconn(**kwargs)
         conn.autocommit = autocommit
         return conn
