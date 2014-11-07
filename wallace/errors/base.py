@@ -1,6 +1,3 @@
-import re
-
-
 class Error(Exception):
     pass
 
