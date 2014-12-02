@@ -17,8 +17,8 @@ class PostgresModel(RelationalModel):
 
     @classmethod
     def find_all(cls, **kwargs):
-        return map(lambda row: cls.construct(new=False, **row),
-                   cls.table.fetchall(**kwargs))
+        rows = cls.table.fetchall(**kwargs)
+        return map(lambda row: cls.construct(new=False, **row), rows)
 
 
     def _read_data(self):
