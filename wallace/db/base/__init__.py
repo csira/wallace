@@ -9,7 +9,7 @@ from wallace.db.base.relational import RelationalModel
 
 __all__ = [
     # models
-    'Model', 'KeyValueModel', 'RelationalModel',
+    'KeyValueModel', 'Model', 'RelationalModel',
 
     # types
     'Boolean', 'ByteArray', 'DataType', 'Float', 'Integer', 'Moment', 'Now',
