@@ -9,9 +9,7 @@ from wallace.config.errors import ConfigError
 def _spin_up(db, **kw):
     if db == 'postgres':
         from wallace.db import PostgresPool
-        return PostgresPool.construct(kw.get('minconns', 1),
-                                      kw.get('maxconns', 1),
-                                      **kw)
+        return PostgresPool.construct(**kw)
     if db == 'redis':
         return redis.Redis(host=kw['host'], port=kw['port'])
     raise ConfigError('unknown db "%s"' % db)
