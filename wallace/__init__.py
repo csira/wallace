@@ -1,5 +1,5 @@
 from wallace.config import ConfigError, setup_app
-from wallace.db import PostgresModel, PostgresTable
+from wallace.db import PostgresModel, PostgresPool, PostgresTable
 from wallace.db import ExpiringRedisHash, RedisHash
 from wallace.db import Boolean, ByteArray, Float, Integer, Moment, Now, String
 from wallace.db import DBError, DoesNotExist, ValidationError
@@ -11,7 +11,7 @@ __all__ = [
     'setup_app',
 
     # dbs / models
-    'PostgresModel', 'PostgresTable',
+    'PostgresModel', 'PostgresPool', 'PostgresTable',
     'ExpiringRedisHash', 'RedisHash',
 
     # types
