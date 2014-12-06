@@ -8,8 +8,8 @@ from psycopg2.pool import ThreadedConnectionPool
 class PostgresPool(ThreadedConnectionPool):
 
     @classmethod
-    def construct(cls, minconns, maxconns, **kwargs):
-        return cls(minconns, maxconns, cursor_factory=RealDictCursor, **kwargs)
+    def construct(cls, minconn=1, maxconn=1, **kwargs):
+        return cls(minconn, maxconn, cursor_factory=RealDictCursor, **kwargs)
 
 
     def getconn(self, autocommit=True, **kwargs):
