@@ -68,6 +68,12 @@ class PostgresTable(object):
     table_name = None
 
     @classmethod
+    def construct(cls, pool):
+        cls.db = pool
+        return cls
+
+
+    @classmethod
     def fetchone(cls, **kwargs):
         cmd, values = select(cls.table_name, **kwargs)
         return cls.db.fetchone(cmd, values)
