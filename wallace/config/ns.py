@@ -1,5 +1,6 @@
 import ujson
 
+from wallace.config.errors import ConfigError
 from wallace.config.obj import App
 
 
@@ -12,11 +13,13 @@ def _deserialize(filename):
         return ujson.loads(data)
 
 
-def setup_app(filename=None, struct=None):
-    if filename:
-        data = _deserialize(filename)
+def setup_app(config):
+    if isinstance(config, str):
+        data = _deserialize(config)
+    elif isinstance(config, dict):
+        data = config
     else:
-        data = struct or {}
+        raise ConfigError('must provide a filename or dictionary')
 
     global _app
     _app = App(**data)
