@@ -9,8 +9,7 @@ from wallace.db.redisdb import RedisHash, ExpiringRedisHash
 
 __all__ = [
     # base
-    'Model', 'KeyValueModel', 'RelationalModel',
-    'DataType',
+    'DataType', 'KeyValueModel', 'Model', 'RelationalModel',
 
     # errors
     'DBError', 'DoesNotExist', 'ValidationError',
