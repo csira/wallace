@@ -61,7 +61,7 @@ To use the standard interface, wrap a table:
   >>> user_table = UserTable.construct(pool)
   >>> user_table.add(name='chris', email='email@someplace.com')
   >>> user_table.fetchall()
-  [{'name': 'chris', email: 'email@someplace.com'}]
+  [{'name': 'chris', 'email': 'email@someplace.com'}]
 
 
 Then create a model (and plug in the table):
