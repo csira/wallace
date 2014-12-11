@@ -1,6 +1,7 @@
 import redis
 import ujson
 
+from wallace.config.cache import get_connection, register_connection
 from wallace.config.errors import ConfigError
 
 # some addl imports in ``_spin_up``
@@ -16,9 +17,6 @@ def _spin_up(db, **kw):
 
 
 class App(object):
-
-    _db_conn_cache = {}
-
     def __init__(self, **kwargs):
         self._config = kwargs
 
@@ -32,10 +30,16 @@ class App(object):
         except KeyError:
             raise ConfigError('config param "%s" not provided' % key)
 
+    def _get_db_parameters(self, name):
+        try:
+            return self['db'][name]
+        except KeyError:
+            raise ConfigError('db params for "%s" not provided ' % name)
+
     def get_db_conn(self, name):
-        db = self._db_conn_cache.get(name)
+        db = get_connection(name, silent=True)
         if not db:
-            data = self['db'][name]
+            data = self._get_db_parameters(name)
             db = _spin_up(**data)
-            self._db_conn_cache[name] = db
+            register_connection(name, db)
         return db

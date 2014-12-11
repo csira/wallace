@@ -4,12 +4,17 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from psycopg2.pool import ThreadedConnectionPool
 
+from wallace.config import register_connection
+
 
 class PostgresPool(ThreadedConnectionPool):
 
     @classmethod
-    def construct(cls, minconn=1, maxconn=1, **kwargs):
-        return cls(minconn, maxconn, cursor_factory=RealDictCursor, **kwargs)
+    def construct(cls, name=None, minconn=1, maxconn=1, **kwargs):
+        pool = cls(minconn, maxconn, cursor_factory=RealDictCursor, **kwargs)
+        if name:
+            register_connection(name, pool)
+        return pool
 
 
     def getconn(self, autocommit=True, **kwargs):

@@ -4,7 +4,7 @@ from wallace.config.errors import ConfigError
 from wallace.config.obj import App
 
 
-_app = None
+_app = App()
 
 
 def _deserialize(filename):
