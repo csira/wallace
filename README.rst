@@ -48,6 +48,9 @@ To spin up a Postgres connection pool, pass DNS connection info and an optional 
   >>>
   >>> # or, specifying a max pool size:
   >>> pool = PostgresPool.construct(maxconn=5, **dns)
+  >>>
+  >>> # also, name the connection if you would like to cache it
+  >>> pool = PostgresPool.construct(name='my_db', **dns)
 
 
 To use the standard interface, wrap a table:
@@ -56,23 +59,23 @@ To use the standard interface, wrap a table:
 
   >>> from wallace import PostgresTable
   >>> class UserTable(PostgresTable):
+  >>>     db_name = 'my_db'  # specified in `PostgresPool.construct` above
   >>>     table_name = 'user'
   >>>
-  >>> user_table = UserTable.construct(pool)
-  >>> user_table.add(name='chris', email='email@someplace.com')
-  >>> user_table.fetchall()
+  >>> UserTable.add(name='chris', email='email@someplace.com')
+  >>> UserTable.fetchall()
   [{'name': 'chris', 'email': 'email@someplace.com'}]
 
 
-Then create a model (and plug in the table):
+And create a model to plug the table like so:
 
 .. code-block:: python
 
   >>> from wallace import PostgresModel, String
   >>> class User(PostgresModel):
-  >>>     table = user_table
+  >>>     table = UserTable
   >>>     name = String()
-  >>>     email = String(pk=True)
+  >>>     email = String(pk=True)  # primary key field
   >>>
   >>> # models may be used to retrieve existing records,
   >>> me = User.fetch(email='email@someplace.com')
