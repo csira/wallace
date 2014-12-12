@@ -126,3 +126,8 @@ class Now(Moment):
 class String(DataType):
 
     cast = str
+
+
+class Unicode(DataType):
+
+    cast = unicode
