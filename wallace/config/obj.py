@@ -1,4 +1,3 @@
-import redis
 import ujson
 
 from wallace.config.cache import get_connection, register_connection
@@ -12,7 +11,8 @@ def _spin_up(db, **kw):
         from wallace.db import PostgresPool
         return PostgresPool.construct(**kw)
     if db == 'redis':
-        return redis.Redis(host=kw['host'], port=kw['port'])
+        from wallace.db import RedisSocket
+        return RedisSocket.construct(**kw)
     raise ConfigError('unknown db "%s"' % db)
 
 

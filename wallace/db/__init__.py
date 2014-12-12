@@ -4,7 +4,7 @@ from wallace.db.base import Boolean, ByteArray, DataType, Float, Integer
 from wallace.db.base import Moment, Now, String
 from wallace.db.base import DBError, DoesNotExist, ValidationError
 from wallace.db.pg import PostgresModel, PostgresPool, PostgresTable
-from wallace.db.redisdb import RedisHash, ExpiringRedisHash
+from wallace.db.redisdb import ExpiringRedisHash, RedisHash, RedisSocket
 
 
 __all__ = [
@@ -18,7 +18,7 @@ __all__ = [
     'PostgresModel', 'PostgresPool', 'PostgresTable',
 
     # redis
-    'ExpiringRedisHash', 'RedisHash',
+    'ExpiringRedisHash', 'RedisHash', 'RedisSocket',
 
     # types
     'Boolean', 'ByteArray', 'DataType', 'Float', 'Integer', 'Moment', 'Now',
