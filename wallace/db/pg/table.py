@@ -15,10 +15,10 @@ def postgres_escape(**kwargs):
     return ','.join(columns), ','.join(placeholders), values
 
 
-def query_expr(**kwargs):
+def query_expr(separator=' AND ', **kwargs):
     columns, _, values = escapes(**kwargs)
     columns = map(lambda col: '%s=%%s' % col, columns)
-    columns = ' AND '.join(columns)
+    columns = separator.join(columns)
     return columns, values
 
 
@@ -36,7 +36,7 @@ def select(table_name, limit=None, **kwargs):
 
 
 def update(table_name, new_data, **wheres):
-    set_exprs, set_vals = query_expr(**new_data)
+    set_exprs, set_vals = query_expr(separator=', ', **new_data)
     where_exprs, where_vals = query_expr(**wheres)
     cmd = 'UPDATE %s SET %s WHERE %s;' % (table_name, set_exprs, where_exprs,)
     return cmd, set_vals + where_vals
