@@ -1,4 +1,5 @@
 from wallace.config import GetDBConn
+from wallace.db.base import ValidationError
 
 
 def escapes(**kwargs):
@@ -84,6 +85,8 @@ class PostgresTable(object):
 
     @classmethod
     def update(cls, new_data, **kwargs):
+        if not new_data:
+            raise ValidationError('nothing to update')
         cmd, values = update(cls.table_name, new_data, **kwargs)
         cls.db.execute(cmd, values)
 
