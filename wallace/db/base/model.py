@@ -92,10 +92,16 @@ class Model(object):
     def pull(self):
         if self._cbs_is_new:
             raise DoesNotExist('new record, push first')
+
         data = self._read_data()
         if not data:
             raise DoesNotExist
+
         self._cbs_db_data = data
+
+        for attr, val in self._cbs_updated:
+            if val == self._cbs_db_data.get(attr):
+                self._cbs_updated.pop(attr)
 
     def _read_data(self):
         raise NotImplementedError
