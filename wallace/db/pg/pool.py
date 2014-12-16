@@ -5,6 +5,23 @@ from psycopg2.extras import RealDictCursor
 from psycopg2.pool import ThreadedConnectionPool
 
 from wallace.config import register_connection
+from wallace.db.base import DBError, ValidationError
+
+
+def _error_msg(err):
+    # http://www.postgresql.org/docs/current/static/errcodes-appendix.html#ERRCODES-TABLE
+    return '%s - %s' % (err.pgcode, err.diag.message_primary,)
+
+
+def _catch(f):
+    def wrap(*a, **kw):
+        try:
+            return f(*a, **kw)
+        except psycopg2.IntegrityError, err:
+            raise ValidationError(_error_msg(err))
+        except psycopg2.Error, err:
+            raise DBError(_error_msg(err))
+    return wrap
 
 
 class PostgresPool(ThreadedConnectionPool):
@@ -51,15 +68,18 @@ class PostgresPool(ThreadedConnectionPool):
         return self.cursor(autocommit=False)
 
 
+    @_catch
     def execute(self, cmd, values=None):
         with self.cursor() as cursor:
             cursor.execute(cmd, values)
 
+    @_catch
     def fetchone(self, cmd, values=None):
         with self.cursor() as cursor:
             cursor.execute(cmd, values)
             return cursor.fetchone()
 
+    @_catch
     def fetchall(self, cmd, values=None):
         with self.cursor() as cursor:
             cursor.execute(cmd, values)
