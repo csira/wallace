@@ -10,7 +10,7 @@ class Base(type):
         for key, val in dct.items():
             if isinstance(val, DataType):
                 val.attr = key
-                if val.default:
+                if val.default is not None:
                     defaults.append((key, val.default,))
 
         the_class = super(Base, cls).__new__(cls, name, bases, dct)
