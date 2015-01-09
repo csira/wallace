@@ -13,6 +13,9 @@
 
 .. _Python: http://python.org/
 
+.. _MongoDB: http://www.mongodb.com
+.. _pymongo: https://pypi.python.org/pypi/pymongo
+
 .. _PostgreSQL: http://www.postgresql.org/
 .. _psycopg: https://pypi.python.org/pypi/psycopg2
 
@@ -30,7 +33,7 @@ it uses, it does not override or replace their funcionality, so
 the interfaces and performance profiles you're familiar with remain intact.
 Major features include:
 
-* **Databases:** Currently supports PostgreSQL_ (psycopg_) and Redis_ (redispy_). More to come
+* **Databases:** Currently supports PostgreSQL_ (psycopg_), Redis_ (redispy_), and Mongo_ (pymongo_). More to come
 * **Modeling:** A bare-bones ORM that provides a consistent interface to model attributes across backends. There's no need to use the ORM if your problem doesn't require it: Wallace consists largely of connection utilities and table-level abstractions
 * **Caching:** Automatic connection pool sharing across all layers of abstraction
 

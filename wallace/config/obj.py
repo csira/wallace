@@ -7,6 +7,9 @@ from wallace.config.errors import ConfigError
 
 
 def _spin_up(db, **kw):
+    if db == 'mongo':
+        from wallace.db import MongoPool
+        return MongoPool.construct(**kw)
     if db == 'postgres':
         from wallace.db import PostgresPool
         return PostgresPool.construct(**kw)

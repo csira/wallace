@@ -1,5 +1,5 @@
 Wallace is a wrapper for database adapters. It offers a mini-ORM,
 extensions to common connection classes (without obscuring driver libraries),
 and a cache for connection pool sharing. Currently supports
-PostgreSQL/psycopg2 and Redis/redis-py (more to come). Thanks for taking
-a look.
+PostgreSQL/psycopg2, Redis/redis-py, and Mongo/pymongo (more to come).
+Thanks for taking a look.
