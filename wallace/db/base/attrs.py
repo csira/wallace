@@ -3,7 +3,17 @@ import time
 from wallace.db.base.errors import ValidationError
 
 
+class _Base(type):
+    def __new__(cls, name, bases, dct):
+        default = dct.get('default')
+        if default and callable(default):
+            dct['default'] = staticmethod(default)
+        return super(_Base, cls).__new__(cls, name, bases, dct)
+
+
 class _Interface(object):
+
+    __metaclass__ = _Base
 
     default = None
 
@@ -120,7 +130,7 @@ class Moment(Integer):
 
 class Now(Moment):
 
-    default = time.time
+    default = lambda: int(time.time())
 
 
 class String(DataType):
