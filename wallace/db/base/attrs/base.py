@@ -1,5 +1,3 @@
-import time
-
 from wallace.db.base.errors import ValidationError
 
 
@@ -90,54 +88,3 @@ class DataType(_Interface, _ValidationMixin, _TypecastMixin):
         self.check_type(val)
         self.validate(val)
         super(DataType, self).__set__(inst, val)
-
-
-
-
-class Boolean(DataType):
-
-    cast = bool
-    default = False
-
-    @classmethod
-    def typecast(cls, val):
-        if isinstance(val, basestring):
-            return val == 'True' or val == 'true'
-        return super(Boolean, cls).typecast(val)
-
-
-class ByteArray(DataType):
-
-    cast = bytearray
-
-
-class Float(DataType):
-
-    cast = float
-    default = 0.0
-
-
-class Integer(DataType):
-
-    cast = int
-    default = 0
-
-
-class Moment(Integer):
-
-    default = None
-
-
-class Now(Moment):
-
-    default = lambda: int(time.time())
-
-
-class String(DataType):
-
-    cast = str
-
-
-class Unicode(DataType):
-
-    cast = unicode
