@@ -33,6 +33,8 @@ class _Interface(object):
 
 class _ValidationMixin(object):
 
+    validators = ()
+
     @staticmethod
     def _check_validators(validators):
         if not isinstance(validators, (list, tuple,)):
@@ -41,12 +43,22 @@ class _ValidationMixin(object):
             if not hasattr(validator, '__call__'):
                 raise TypeError('validator not callable')
 
-    def __init__(self, validators):
+    @classmethod
+    def _check_all_validators(cls, validators):
+        cls._check_validators(cls.validators)
         if validators:
-            self._check_validators(validators)
-            self._validators = tuple(validators)
-        else:
-            self._validators = ()
+            cls._check_validators(validators)
+
+    @classmethod
+    def _merge_validators(cls, validators):
+        base_vals = cls.validators + ()  # workaround for tuple deepcopy
+        if validators:
+            return base_vals + tuple(validators)
+        return base_vals
+
+    def __init__(self, validators):
+        self._check_all_validators(validators)
+        self._validators = self._merge_validators(validators)
 
     def validate(self, val):
         for f in self._validators:
