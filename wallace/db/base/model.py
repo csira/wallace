@@ -34,7 +34,7 @@ class Model(object):
 
         for attr, default in cls._cbs_default_fields:
             val = default() if callable(default) else default
-            inst._cbs_updated[attr] = val
+            setattr(inst, attr, val)
 
         return inst
 
