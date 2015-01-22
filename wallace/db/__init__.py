@@ -1,7 +1,7 @@
 from wallace.db.base import Model, KeyValueModel, RelationalModel
 from wallace.db.base import DataType
 from wallace.db.base import Boolean, ByteArray, DataType, Float, Integer
-from wallace.db.base import Moment, Now, String, Unicode
+from wallace.db.base import Moment, Now, String, Unicode, UUID
 from wallace.db.base import DBError, DoesNotExist, ValidationError
 from wallace.db.mongo import MongoCollection, MongoDocument, MongoPool
 from wallace.db.pg import PostgresModel, PostgresPool, PostgresTable
@@ -26,5 +26,5 @@ __all__ = [
 
     # types
     'Boolean', 'ByteArray', 'DataType', 'Float', 'Integer', 'Moment', 'Now',
-    'String', 'Unicode',
+    'String', 'Unicode', 'UUID',
 ]
