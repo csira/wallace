@@ -72,11 +72,9 @@ class _TypecastMixin(object):
 
     @classmethod
     def typecast(cls, val):
-        return cls.cast(val) if cls.cast else val
-
-    @classmethod
-    def check_type(cls, val):
-        if not isinstance(val, cls.cast):
+        try:
+            return cls.cast(val) if cls.cast else val
+        except ValueError:
             raise ValidationError(val)
 
 
@@ -86,17 +84,11 @@ class DataType(_Interface, _ValidationMixin, _TypecastMixin):
         _ValidationMixin.__init__(self, validators)
         _TypecastMixin.__init__(self)
 
-    def __get__(self, inst, owner):
-        val = super(DataType, self).__get__(inst, owner)
-        if val is None:
-            return val
-        return self.typecast(val)
-
     def __set__(self, inst, val):
         if val is None:
             self.__delete__(inst)
             return
 
-        self.check_type(val)
+        val = self.typecast(val)
         self.validate(val)
         super(DataType, self).__set__(inst, val)

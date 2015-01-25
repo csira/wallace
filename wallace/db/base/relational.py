@@ -25,7 +25,7 @@ class _PKBase(Base):
         for key, val in dct.iteritems():
             if isinstance(val, DataType) and val.is_pk:
                 pk_fields.add(key)
-            elif key in pk_fields:      # catch a superclass's pk field that's
+            elif key in pk_fields:      # catch any superclass pk fields
                 pk_fields.remove(key)   # overridden here by a non-pk one
 
         return tuple(pk_fields)
@@ -58,8 +58,7 @@ class RelationalModel(Model):
 
     @classmethod
     def fetch(cls, **kwargs):
-        inst = cls()
-        inst._cbs_db_data = kwargs
+        inst = cls.construct(new=False, **kwargs)
         inst.pull()
         return inst
 
@@ -84,8 +83,8 @@ class RelationalModel(Model):
     @property
     def primary_key(self):
         # The primary key CURRENTLY stored in the db.
-        # If a pk field is changed, this will continue to return the old value
-        # so updates can find the row.
+        # If a pk field is changed, this will continue to return the old
+        # value so updates can find the row.
 
         if self.is_new:
             raise DoesNotExist('new model')

@@ -56,18 +56,11 @@ class Unicode(DataType):
 class UUID(String):
 
     default = lambda: uuid.uuid4().hex
-
     validators = (
         lambda val: len(val) == 32,
         lambda val: val[12] == '4',
         lambda val: val[16] in ('8', '9', 'a', 'b',),
     )
-
-    def __get__(self, inst, owner):
-        val = super(UUID, self).__get__(inst, owner)
-        if isinstance(val, uuid.UUID):
-            return val.hex
-        return val
 
     def __set__(self, inst, val):
         if isinstance(val, uuid.UUID):
