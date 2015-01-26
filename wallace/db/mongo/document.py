@@ -31,7 +31,8 @@ class MongoDocument(KeyValueModel):
 
     def _read_data(self):
         data = self.collection.find_one(_id=self.ident)
-        data.pop('_id', None)
+        if data:
+            data.pop('_id', None)
         return data
 
     def _write_data(self, state, _):
