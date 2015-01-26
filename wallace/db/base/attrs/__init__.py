@@ -7,6 +7,6 @@ from wallace.db.base.attrs.datatypes import String, Unicode, UUID
 __all__ = [
     'DataType',
 
-    'Boolean', 'ByteArray', 'Float', 'Integer', 'Moment', 'Now',
-    'String', 'Unicode', 'UUID',
+    'Boolean', 'ByteArray', 'Float', 'Integer', 'Moment', 'Now', 'String',
+    'Unicode', 'UUID',
 ]

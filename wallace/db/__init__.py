@@ -25,6 +25,6 @@ __all__ = [
     'ExpiringRedisHash', 'RedisHash', 'RedisSocket',
 
     # types
-    'Boolean', 'ByteArray', 'DataType', 'Float', 'Integer', 'Moment', 'Now',
-    'String', 'Unicode', 'UUID',
+    'Boolean', 'ByteArray', 'Float', 'Integer', 'Moment', 'Now', 'String',
+    'Unicode', 'UUID',
 ]
