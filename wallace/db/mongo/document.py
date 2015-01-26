@@ -8,7 +8,7 @@ class MongoDocument(KeyValueModel):
 
     @classmethod
     def find_one(cls, **kwargs):
-        data = cls.collection.find(**kwargs)
+        data = cls.collection.fetchall(**kwargs)
         if not data:
             raise DoesNotExist
         if len(data) != 1:
@@ -17,7 +17,7 @@ class MongoDocument(KeyValueModel):
 
     @classmethod
     def find_all(cls, **kwargs):
-        docs = cls.collection.find(**kwargs)
+        docs = cls.collection.fetchall(**kwargs)
         return map(lambda doc: cls.construct(new=False, **doc), docs)
 
 
@@ -30,7 +30,7 @@ class MongoDocument(KeyValueModel):
 
 
     def _read_data(self):
-        data = self.collection.find_one(_id=self.ident)
+        data = self.collection.fetchone(_id=self.ident)
         if data:
             data.pop('_id', None)
         return data

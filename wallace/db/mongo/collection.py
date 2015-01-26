@@ -24,11 +24,11 @@ class MongoCollection(object):
     collection_name = None
 
     @classmethod
-    def find_one(cls, **kwargs):
+    def fetchone(cls, **kwargs):
         return cls.collection.find_one(spec_or_id=kwargs)
 
     @classmethod
-    def find(cls, **kwargs):
+    def fetchall(cls, **kwargs):
         data = cls.collection.find(kwargs)
         return list(data)
 
