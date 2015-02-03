@@ -42,7 +42,7 @@ class Model(object):
     def construct(cls, new=True, **kwargs):
         if new:
             inst = cls.new()
-            self._set_multiple_values(**kwargs)
+            inst._set_multiple_values(**kwargs)
         else:
             inst = cls()
             inst._set_inbound_db_data(**kwargs)
