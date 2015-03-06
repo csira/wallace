@@ -76,7 +76,6 @@ def is_uuid(val):
 
 class UUID(String):
 
-    default = lambda: uuid.uuid4().hex
     validators = (
         lambda val: len(val) == 32,
         is_uuid,
