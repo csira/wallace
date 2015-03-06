@@ -1,7 +1,7 @@
 from wallace.db.base import Model, KeyValueModel, RelationalModel
 from wallace.db.base import DataType
-from wallace.db.base import Boolean, ByteArray, DataType, Float, Integer
-from wallace.db.base import Moment, Now, String, Unicode, UUID
+from wallace.db.base import Boolean, ByteArray, Float, Integer, JSON, Moment
+from wallace.db.base import Now, String, Unicode, UUID, UUID4
 from wallace.db.base import DBError, DoesNotExist, ValidationError
 from wallace.db.mongo import MongoCollection, MongoDocument, MongoPool
 from wallace.db.pg import PostgresModel, PostgresPool, PostgresTable
@@ -25,6 +25,6 @@ __all__ = [
     'ExpiringRedisHash', 'RedisHash', 'RedisSocket',
 
     # types
-    'Boolean', 'ByteArray', 'Float', 'Integer', 'Moment', 'Now', 'String',
-    'Unicode', 'UUID',
+    'Boolean', 'ByteArray', 'Float', 'Integer', 'JSON', 'Moment', 'Now',
+    'String', 'Unicode', 'UUID', 'UUID4',
 ]
