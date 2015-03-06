@@ -6,12 +6,27 @@ class _Base(type):
         default = dct.get('default')
         if default and callable(default):
             dct['default'] = staticmethod(default)
+
+        validators = dct.get('validators')
+        if validators:
+            dct['validators'] = cls._merge_base_validators(bases, validators)
+
         return super(_Base, cls).__new__(cls, name, bases, dct)
+
+    @staticmethod
+    def _merge_base_validators(bases, validators):
+        all_validators = []
+        for base in list(bases)[::-1]:  # top of the inheritance tree first
+            for val in getattr(base, 'validators', ()):
+                all_validators.append(val)
+
+        for val in validators:
+            all_validators.append(val)
+
+        return tuple(all_validators)
 
 
 class _Interface(object):
-
-    __metaclass__ = _Base
 
     default = None
 
@@ -79,6 +94,9 @@ class _TypecastMixin(object):
 
 
 class DataType(_Interface, _ValidationMixin, _TypecastMixin):
+
+    __metaclass__ = _Base
+
     def __init__(self, validators=None, **kwargs):
         _Interface.__init__(self, **kwargs)
         _ValidationMixin.__init__(self, validators)
