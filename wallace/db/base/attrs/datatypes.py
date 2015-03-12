@@ -81,10 +81,14 @@ class UUID(String):
         is_uuid,
     )
 
-    def __set__(self, inst, val):
+    @classmethod
+    def typecast(cls, val):
         if isinstance(val, uuid.UUID):
             val = val.hex
-        super(UUID, self).__set__(inst, val)
+        else:
+            val = uuid.UUID(val).hex
+
+        return super(UUID, cls).typecast(val)
 
 
 class UUID4(UUID):
