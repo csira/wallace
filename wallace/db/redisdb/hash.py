@@ -39,8 +39,9 @@ class RedisHash(KeyValueModel):
             pipeline.delete(self.db_key)        # full refresh to clean
             pipeline.hmset(self.db_key, state)  # up deleted fields
 
-    def delete(self):
-        self.db.delete(self.db_key)
+    def delete(self, pipe=None):
+        with pipeline_execute(self.db, pipe) as pipeline:
+            pipeline.delete(self.db_key)
 
 
 class ExpiringRedisHash(RedisHash):
