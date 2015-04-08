@@ -58,11 +58,12 @@ class JSON(String):
 
     def __get__(self, inst, owner):
         serialized = super(JSON, self).__get__(inst, owner)
-        return ujson.loads(serialized)
+        return ujson.loads(serialized) if serialized else serialized
 
-    def __set__(self, inst, val):
-        serialized = ujson.dumps(val)
-        super(JSON, self).__set__(inst, serialized)
+    @classmethod
+    def typecast(cls, val):
+        val = ujson.dumps(val) if val else val
+        super(JSON, cls).__set__(inst, val)
 
 
 
