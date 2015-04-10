@@ -63,7 +63,7 @@ class JSON(String):
     @classmethod
     def typecast(cls, val):
         val = ujson.dumps(val) if val else val
-        super(JSON, cls).__set__(inst, val)
+        return super(JSON, cls).typecast(val)
 
 
 
