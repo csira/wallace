@@ -84,6 +84,9 @@ class Model(object):
         with self._guard_state_for_inbound_db_data():
             self._set_multiple_values(**kwargs)
 
+    def multiset(self, **kwargs):
+        self._set_multiple_values(**kwargs)
+
 
     def _get_attr(self, attr):
         if attr in self._cbs_deleted:
