@@ -75,12 +75,17 @@ def is_uuid(val):
     return True
 
 
+def is_uuid4(val):
+    try:
+        val = uuid.UUID(val)
+    except ValueError:
+        return False
+    return val.version == 4
+
+
 class UUID(String):
 
-    validators = (
-        lambda val: len(val) == 32,
-        is_uuid,
-    )
+    validators = (is_uuid,)
 
     @classmethod
     def typecast(cls, val):
@@ -94,7 +99,4 @@ class UUID(String):
 
 class UUID4(UUID):
 
-    validators = (
-        lambda val: val[12] == '4',
-        lambda val: val[16] in ('8', '9', 'a', 'b',),
-    )
+    validators = (is_uuid4,)
