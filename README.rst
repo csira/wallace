@@ -94,7 +94,7 @@ And create a model to plug the table like so:
   ['bdfl@python.org']
 
 
-Update a model by 'push'ing:
+Update a model by *'push'*-ing:
 
 .. code-block:: python
 
@@ -110,7 +110,7 @@ Update a model by 'push'ing:
   'chris'
 
 
-'delete' to delete:
+*'delete'* to delete:
 
 .. code-block:: python
 
