@@ -27,8 +27,8 @@ class RedisHash(KeyValueModel):
 
     def _write_data(self, state, _, pipe=None):
         with self._pipe_state_mgr(pipe) as pipe:
-            pipe.delete(self.db_key)        # full refresh to clean
-            pipe.hmset(self.db_key, state)  # up deleted fields
+            pipe.delete(self.db_key)        # delete first to
+            pipe.hmset(self.db_key, state)  # clear deleted fields
 
     def delete(self, pipe=None):
         with self._pipe_state_mgr(pipe) as pipe:
