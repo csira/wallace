@@ -2,8 +2,10 @@ from setuptools import find_packages, setup
 
 
 long_desc = '''\
-Wallace is a wrapper for the Postgres, Redis, and Mongo database adapters
-(more to come) that provides db connection utilities and a small ORM.
+Wallace is a wrapper for the Postgres, Redis, and Mongo database adapters.
+It focuses on connection utilities and table-level abstractions but offers
+a mini-ORM built around consistent attribute type declarations across
+backends.
 '''
 
 
@@ -16,7 +18,7 @@ if __name__ == '__main__':
         author_email='cbsira@gmail.com',
         license='BSD',
         url='https://github.com/csira/wallace',
-        description='Connection utilities and micro-ORM for PostgreSQL, Redis, and MongoDB.',
+        description='Connection utilities, mini-ORM for PostgreSQL, Redis, and MongoDB.',
         long_description=long_desc,
         install_requires=[
             'psycopg2',

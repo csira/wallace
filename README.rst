@@ -34,8 +34,8 @@ the interfaces and performance profiles you're familiar with remain intact.
 Major features include:
 
 * **Databases:** Currently supports PostgreSQL_ (psycopg_), Redis_ (redispy_), and MongoDB_ (pymongo_). More to come
-* **Modeling:** A bare-bones ORM that provides a consistent interface to model attributes across backends. There's no need to use the ORM if your problem doesn't require it: Wallace consists largely of connection utilities and table-level abstractions
-* **Caching:** Automatic connection pool sharing across all layers of abstraction
+* **Modeling:** A bare-bones ORM, built around a consistent interface to model attributes across backends. Wallace largely consists of connection utilities and table-level abstractions so model use is optional
+* **Caching:** Automatic connection pool sharing - set it and forget it
 
 
 Basic Usage
@@ -94,7 +94,7 @@ And create a model to plug the table like so:
   ['bdfl@python.org']
 
 
-Update, delete, etc. are available too of course:
+Update a model by 'push'ing:
 
 .. code-block:: python
 
@@ -106,11 +106,15 @@ Update, delete, etc. are available too of course:
   ...
   wallace.db.base.errors.DoesNotExist
   >>>
-  >>> u = User.fetch(email='new_email@somewherenew.com')
-  >>> u.name
+  >>> print User.fetch(email='new_email@somewherenew.com').name
   'chris'
-  >>>
-  >>> u.delete()
+
+
+'delete' to delete:
+
+.. code-block:: python
+
+  >>> me.delete()
   >>> User.fetch(email='new_email@somewherenew.com')
   Traceback (most recent call last):
   ...
