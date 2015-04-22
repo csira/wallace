@@ -6,17 +6,28 @@ from wallace.db.base.errors import DoesNotExist
 
 class Base(type):
     def __new__(cls, name, bases, dct):
-        defaults = []
-        for key, val in dct.items():
+        the_class = super(Base, cls).__new__(cls, name, bases, dct)
+        the_class._cbs_default_fields = cls._get_defaults(bases, dct)
+        return the_class
+
+    @staticmethod
+    def _get_defaults(bases, dct):
+        defaults = {}
+
+        for base in bases:  # handle model inheritance
+            for key, val in getattr(base, '_cbs_default_fields', []):
+                defaults[key] = val
+
+        for key, val in dct.iteritems():
             if isinstance(val, DataType):
                 val.attr = key
+
                 if val.default is not None:
-                    defaults.append((key, val.default,))
+                    defaults[key] = val.default
+                elif key in defaults:  # catch superclass default fields
+                    defaults.pop(key)  # overwridden here w/o a default
 
-        the_class = super(Base, cls).__new__(cls, name, bases, dct)
-        the_class._cbs_default_fields = tuple(defaults)
-
-        return the_class
+        return tuple(defaults.items())
 
 
 class Model(object):
