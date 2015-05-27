@@ -11,10 +11,10 @@ class Boolean(DataType):
     default = False
 
     @classmethod
-    def typecast(cls, val):
+    def typecast(cls, inst, val):
         if isinstance(val, basestring):
             return val == 'True' or val == 'true' or val == 't'
-        return super(Boolean, cls).typecast(val)
+        return super(Boolean, cls).typecast(inst, val)
 
 
 class ByteArray(DataType):
@@ -61,9 +61,16 @@ class JSON(String):
         return ujson.loads(serialized) if serialized else serialized
 
     @classmethod
-    def typecast(cls, val):
+    def typecast(cls, inst, val):
+        if val and isinstance(val, basestring):
+            try:
+                val = ujson.loads(val)
+            except TypeError:
+                if inst._cbs_is_db_data_inbound:
+                    raise
+
         val = ujson.dumps(val) if val else val
-        return super(JSON, cls).typecast(val)
+        return super(JSON, cls).typecast(inst, val)
 
 
 
@@ -88,13 +95,13 @@ class UUID(String):
     validators = (is_uuid,)
 
     @classmethod
-    def typecast(cls, val):
+    def typecast(cls, inst, val):
         if isinstance(val, uuid.UUID):
             val = val.hex
         else:
             val = uuid.UUID(val).hex
 
-        return super(UUID, cls).typecast(val)
+        return super(UUID, cls).typecast(inst, val)
 
 
 class UUID4(UUID):

@@ -61,7 +61,7 @@ class _TypecastMixin(object):
     cast = None
 
     @classmethod
-    def typecast(cls, val):
+    def typecast(cls, inst, val):
         try:
             return cls.cast(val) if cls.cast else val
         except ValueError:
@@ -131,6 +131,6 @@ class DataType(_Interface, _ValidationMixin, _TypecastMixin):
             self.__delete__(inst)
             return
 
-        val = self.typecast(val)
+        val = self.typecast(inst, val)
         self.validate(val)
         super(DataType, self).__set__(inst, val)
