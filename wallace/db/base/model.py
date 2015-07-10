@@ -73,7 +73,9 @@ class Model(object):
 
     @property
     def is_modified(self):
-        return self._cbs_deleted or self._cbs_updated
+        if self._cbs_deleted or self._cbs_updated:
+            return True
+        return False
 
     def is_attr_modified(self, attr):
         return (attr in self._cbs_deleted or attr in self._cbs_updated)
