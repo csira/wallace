@@ -72,6 +72,10 @@ class Model(object):
         return self._cbs_is_new
 
     @property
+    def is_modified(self):
+        return self._cbs_deleted or self._cbs_updated
+
+    @property
     def raw(self):
         data = dict(self._cbs_db_data)
         data.update(self._cbs_updated)
