@@ -75,6 +75,9 @@ class Model(object):
     def is_modified(self):
         return self._cbs_deleted or self._cbs_updated
 
+    def is_attr_modified(self, attr):
+        return (attr in self._cbs_deleted or attr in self._cbs_updated)
+
     @property
     def raw(self):
         data = dict(self._cbs_db_data)
