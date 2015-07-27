@@ -107,6 +107,7 @@ class Model(object):
 
     def multiset(self, **kwargs):
         self._set_multiple_values(**kwargs)
+        return self
 
 
     def _get_attr(self, attr):
@@ -148,6 +149,8 @@ class Model(object):
 
         self._set_inbound_db_data(**data)
 
+        return self
+
     def _read_data(self):
         raise NotImplementedError
 
@@ -155,6 +158,7 @@ class Model(object):
     def push(self, *a, **kw):
         with self._state_mgr_for_writes() as (state, changes,):
             self._write_data(state, changes, *a, **kw)
+        return self
 
     @contextmanager
     def _state_mgr_for_writes(self):
@@ -178,6 +182,7 @@ class Model(object):
     def rollback(self):
         self._cbs_deleted = set()
         self._cbs_updated = {}
+        return self
 
     def delete(self):
         raise NotImplementedError
