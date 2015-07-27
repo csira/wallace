@@ -32,4 +32,6 @@ class PostgresModel(RelationalModel):
 
 
     def delete(self):
+        if not self.primary_key:
+            raise DoesNotExist
         self.table.delete(**self.primary_key)
