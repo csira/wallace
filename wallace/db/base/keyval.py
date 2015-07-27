@@ -47,7 +47,8 @@ class KeyValueModel(Model):
     @contextmanager
     def _new_model_key_handler(self):
         if not self.is_new and self._cbs_ident is None:
-            raise ValidationError('non-new model without an ident')
+            msg = 'construction error, exists without an ident'
+            raise ValidationError(msg)
 
         reset_key_on_error = False
         if self._cbs_ident is None:
