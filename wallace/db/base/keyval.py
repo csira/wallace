@@ -35,14 +35,10 @@ class KeyValueModel(Model):
 
     @property
     def db_key(self):
-        if self.prefix:
-            return '%s:%s' % (self.prefix, self.ident,)
         return self.ident
 
 
-    _create_new_ident = staticmethod(lambda: uuid.uuid4().hex)
-    prefix = None
-
+    create_new_ident = staticmethod(lambda: uuid.uuid4().hex)
 
     def push(self, *args, **kwargs):
         with self._new_model_key_handler():
@@ -55,7 +51,7 @@ class KeyValueModel(Model):
 
         reset_key_on_error = False
         if self._cbs_ident is None:
-            self._cbs_ident = self._create_new_ident()
+            self._cbs_ident = self.create_new_ident()
             reset_key_on_error = True
 
         try:
