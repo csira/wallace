@@ -65,11 +65,11 @@ class RelationalModel(Model):
 
     def pull(self):
         self._validate_pk()
-        super(RelationalModel, self).pull()
+        return super(RelationalModel, self).pull()
 
     def push(self, *a, **kw):
         self._validate_pk()
-        super(RelationalModel, self).push(*a, **kw)
+        return super(RelationalModel, self).push(*a, **kw)
 
     def _validate_pk(self, silent=False):
         for attr in self._cbs_primary_key_fields:

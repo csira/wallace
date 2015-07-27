@@ -42,7 +42,7 @@ class KeyValueModel(Model):
 
     def push(self, *args, **kwargs):
         with self._new_model_key_handler():
-            super(KeyValueModel, self).push(*args, **kwargs)
+            return super(KeyValueModel, self).push(*args, **kwargs)
 
     @contextmanager
     def _new_model_key_handler(self):
