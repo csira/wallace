@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 
 from wallace.config import GetDBConn
-from wallace.db.base import KeyValueModel
+from wallace.db.base import KeyValueModel, DoesNotExist
 
 
 class RedisHash(KeyValueModel):
@@ -46,6 +46,9 @@ class RedisHash(KeyValueModel):
             pipe.hmset(self.db_key, state)  # clear deleted fields
 
     def delete(self, pipe=None):
+        if not self.db_key:
+            raise DoesNotExist
+
         with self._pipe_state_mgr(pipe) as pipe:
             pipe.delete(self.db_key)
 
