@@ -9,6 +9,21 @@ class RedisHash(KeyValueModel):
     db = GetDBConn()
     db_name = None
 
+    @classmethod
+    def fetch_many(cls, *idents):
+        with cls.db.pipeline() as pipe:
+            for ident in idents:
+                pipe.hgetall(ident)
+            data = pipe.execute()
+
+        items = []
+        for idx, attrs in enumerate(data):
+            inst = cls.construct(ident=idents[idx], new=False, **attrs)
+            items.append(inst)
+
+        return items
+
+
     @contextmanager
     def _pipe_state_mgr(self, pipe=None):
         if pipe is None:
