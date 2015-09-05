@@ -60,9 +60,21 @@ class PostgresPool(ThreadedConnectionPool):
 
     @contextmanager
     def cursor(self, autocommit=True):
+        '''
+        When a connection exits the with block,
+            - the tx is committed if no errors were encountered
+            - the tx is rolled back if errors
+
+        When a cursor exits its with block it is closed, without affecting
+        the state of the transaction.
+
+        http://initd.org/psycopg/docs/usage.html
+
+        '''
+
         with self.connection(autocommit) as conn:
-            yield conn.cursor()
-            conn.commit()
+            with conn.cursor() as cursor:
+                yield cursor
 
     def transaction(self):
         return self.cursor(autocommit=False)
