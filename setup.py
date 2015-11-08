@@ -13,7 +13,7 @@ if __name__ == '__main__':
     setup(
         packages=find_packages(),
         name='Wallace',
-        version='0.0.9',
+        version='0.1.0',
         author='Christopher Sira',
         author_email='cbsira@gmail.com',
         license='BSD',
@@ -27,7 +27,7 @@ if __name__ == '__main__':
             'ujson',
         ],
         classifiers=[
-            'Development Status :: 3 - Alpha',
+            'Development Status :: 4 - Beta',
             'Environment :: Web Environment',
             'Intended Audience :: Developers',
             'License :: Freely Distributable',
