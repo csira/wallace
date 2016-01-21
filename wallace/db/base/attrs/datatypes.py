@@ -53,6 +53,14 @@ class Unicode(DataType):
 
     cast = unicode
 
+    @classmethod
+    def typecast(cls, inst, val):
+        try:
+            val = cls.cast(val)
+        except UnicodeDecodeError:
+            val = val.decode('utf-8')
+        return super(Unicode, cls).typecast(inst, val)
+
 
 class JSON(String):
 
