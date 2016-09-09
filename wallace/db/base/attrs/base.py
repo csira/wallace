@@ -1,136 +1,88 @@
-from wallace.db.base.errors import ValidationError
-
-
-class _Interface(object):
-
-    default = None
-
-    def __init__(self, pk=False, default=None):
-        self.attr = None
-        self.is_pk = pk
-        if default is not None:
-            self.default = default
-
-    def __get__(self, inst, owner):
-        return inst._get_attr(self.attr)
-
-    def __set__(self, inst, val):
-        inst._set_attr(self.attr, val)
-
-    def __delete__(self, inst):
-        inst._del_attr(self.attr)
-
-
-class _ValidationMixin(object):
-
-    validators = ()
-
-    @staticmethod
-    def _check_validators(validators):
-        if not isinstance(validators, (list, tuple,)):
-            raise TypeError('validators not iterable')
-        for validator in validators:
-            if not hasattr(validator, '__call__'):
-                raise TypeError('validator not callable')
-
-    @classmethod
-    def _check_all_validators(cls, validators):
-        cls._check_validators(cls.validators)
-        if validators:
-            cls._check_validators(validators)
-
-    @classmethod
-    def _merge_validators(cls, validators):
-        base_vals = cls.validators + ()  # workaround for tuple deepcopy
-        if validators:
-            return base_vals + tuple(validators)
-        return base_vals
-
-    def __init__(self, validators):
-        self._check_all_validators(validators)
-        self.validators = self._merge_validators(validators)
-
-    def validate(self, val):
-        for f in self.validators:
-            if not f(val):
-                raise ValidationError(val)
-
-
-class _TypecastMixin(object):
-
-    cast = None
-
-    @classmethod
-    def typecast(cls, inst, val):
-        try:
-            return cls.cast(val) if cls.cast else val
-        except ValueError:
-            raise ValidationError(val)
-
-
-def _check_default_validates(default, cast_func, validators):
-    if default is None:
-        return
-
-    if callable(default):
-        default = default()
-
-    if cast_func:
-        if not isinstance(default, cast_func):
-            msg = 'default `%s` not a %s' % (default, cast_func.__name__,)
-            raise ValidationError(msg)
-
-    for func in validators:
-        if not func(default):
-            msg = 'default `%s` does not validate' % default
-            raise ValidationError(msg)
+from wallace.db.base.attrs.interface import ModelInterface
+from wallace.db.base.attrs.validator_mixin import ValidatorMixin
+from wallace.errors import ValidationError, WallaceError
 
 
 class _Base(type):
+
     def __new__(cls, name, bases, dct):
         default = dct.get('default')
-        if default and callable(default):
+        if callable(default):
             dct['default'] = staticmethod(default)
-
-        validators = dct.get('validators', ())
-        if validators:
-            dct['validators'] = cls._merge_base_validators(bases, validators)
 
         return super(_Base, cls).__new__(cls, name, bases, dct)
 
     def __init__(cls, name, bases, dct):
         super(_Base, cls).__init__(name, bases, dct)
-        _check_default_validates(cls.default, cls.cast, cls.validators)
 
-    @staticmethod
-    def _merge_base_validators(bases, validators):
-        all_validators = []
-        for base in bases:
-            for val in getattr(base, 'validators', ()):
-                all_validators.append(val)
+        if name == 'DataType':  # 'data_type' is not set on the base
+            return
 
-        for val in validators:
-            all_validators.append(val)
+        if not cls.data_type:
+            raise ValidationError(301, 'data_type cannot be None')
 
-        return tuple(all_validators)
+        if not isinstance(cls.data_type, type):
+            raise ValidationError(309)
+
+        cls._validate_default()
+
+    def _validate_default(cls):
+        default = cls.default() if callable(cls.default) else cls.default
+        if default is None:
+            return
+
+        cls._handle_typing(default)
+
+        for func in cls.validators:
+            if not func(default):
+                msg = 'default "{}" does not validate'.format(default)
+                raise ValidationError(302, msg)
 
 
-class DataType(_Interface, _ValidationMixin, _TypecastMixin):
+class DataType(ModelInterface, ValidatorMixin):
 
     __metaclass__ = _Base
 
-    def __init__(self, validators=None, **kwargs):
-        _Interface.__init__(self, **kwargs)
-        _ValidationMixin.__init__(self, validators)
-        _TypecastMixin.__init__(self)
+    data_type = None
 
-        _check_default_validates(self.default, self.cast, self.validators)
+    def __init__(self, validators=None, default=None, pk=False, key=False):
+        if self.__class__.__name__ == 'DataType':
+            raise WallaceError(303, "DataType cannot be used directly")
+
+        ValidatorMixin.__init__(self, validators)
+        ModelInterface.__init__(self, pk=pk, key=key, default=default)
+
+        if self.default is not None:  # validation only, the model instance doesn't exist yet
+            val = self.default() if callable(self.default) else self.default
+            if val is not None:
+                val = self._handle_typing(val)
+                self.validate(val)
 
     def __set__(self, inst, val):
         if val is None:
             self.__delete__(inst)
             return
 
-        val = self.typecast(inst, val)
+        if inst.middleware:
+            val = inst.middleware.cast(self.data_type, val)
+
+        val = self._handle_typing(val)
+
         self.validate(val)
         super(DataType, self).__set__(inst, val)
+
+    @classmethod
+    def _handle_typing(cls, val):
+        if isinstance(val, cls.data_type):
+            return val
+
+        val = cls.cast_to_type(val)
+
+        if not isinstance(val, cls.data_type):
+            raise ValidationError(304)
+
+        return val
+
+    @staticmethod
+    def cast_to_type(val):
+        raise ValidationError(308)

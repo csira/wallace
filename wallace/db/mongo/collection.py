@@ -1,13 +1,15 @@
 from wallace.config import GetDBConn
-from wallace.db.base import DoesNotExist
+from wallace.errors import DoesNotExist
 
 
 class _Database(object):
+
     def __get__(self, inst, owner):
         return owner.db[owner.database_name]
 
 
 class _Collection(object):
+
     def __get__(self, inst, owner):
         return owner.database[owner.collection_name]
 
@@ -41,7 +43,7 @@ class MongoCollection(object):
         cls.collection.save(data)
 
     @classmethod
-    def delete(cls, ident):
-        if not ident:           # `remove` drops all documents in the
+    def delete(cls, key):
+        if not key:             # `remove` drops all documents in the
             raise DoesNotExist  # collection if `spec_or_id` is None
-        cls.collection.remove(spec_or_id=ident, multi=False)
+        cls.collection.remove(spec_or_id=key, multi=False)

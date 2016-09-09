@@ -2,36 +2,68 @@ import time
 import uuid
 
 import ujson
+
 from wallace.db.base.attrs.base import DataType
+from wallace.errors import ValidationError
+
+
+class Array(DataType):
+
+    default = lambda: []
+    data_type = list
+
+    @staticmethod
+    def cast_to_type(val):
+        if isinstance(val, tuple):
+            return list(val)
+        raise ValidationError(308)
 
 
 class Boolean(DataType):
 
-    cast = bool
     default = False
+    data_type = bool
 
-    @classmethod
-    def typecast(cls, inst, val):
-        if isinstance(val, basestring):
-            return val == 'True' or val == 'true' or val == 't'
-        return super(Boolean, cls).typecast(inst, val)
+    @staticmethod
+    def cast_to_type(val):
+        if isinstance(val, int) or isinstance(val, float):
+            if val == 0:
+                return False
+            elif val == 1:
+                return True
+
+        raise ValidationError(308)
 
 
 class ByteArray(DataType):
 
-    cast = bytearray
+    default = bytearray(b'')
+    data_type = bytearray
 
 
 class Float(DataType):
 
-    cast = float
     default = 0.0
+    data_type = float
+
+    @staticmethod
+    def cast_to_type(val):
+        if isinstance(val, int):
+            return float(val)
+        raise ValidationError(308)
 
 
 class Integer(DataType):
 
-    cast = int
     default = 0
+    data_type = int
+
+    @staticmethod
+    def cast_to_type(val):
+        if isinstance(val, float):
+            if int(val) == val:
+                return int(val)
+        raise ValidationError(308)
 
 
 class Moment(Integer):
@@ -46,20 +78,30 @@ class Now(Moment):
 
 class String(DataType):
 
-    cast = str
+    default = ""
+    data_type = str
+
+    @staticmethod
+    def cast_to_type(val):
+        if isinstance(val, basestring):
+            return str(val)
+        raise ValidationError(308)
 
 
 class Unicode(DataType):
 
-    cast = unicode
+    default = u""
+    data_type = unicode
 
-    @classmethod
-    def typecast(cls, inst, val):
+    @staticmethod
+    def cast_to_type(val):
+        if not isinstance(val, basestring):
+            raise ValidationError(308)
+
         try:
-            val = cls.cast(val)
+            return unicode(val)
         except UnicodeDecodeError:
-            val = val.decode('utf-8')
-        return super(Unicode, cls).typecast(inst, val)
+            return val.decode('utf-8')
 
 
 class JSON(String):
@@ -68,18 +110,9 @@ class JSON(String):
         serialized = super(JSON, self).__get__(inst, owner)
         return ujson.loads(serialized) if serialized else serialized
 
-    @classmethod
-    def typecast(cls, inst, val):
-        if val and isinstance(val, basestring):
-            try:
-                val = ujson.loads(val)
-            except TypeError:
-                if inst._cbs_is_db_data_inbound:
-                    raise
-
-        val = ujson.dumps(val) if val else val
-        return super(JSON, cls).typecast(inst, val)
-
+    @staticmethod
+    def cast_to_type(val):
+        return ujson.dumps(val)
 
 
 def is_uuid(val):
@@ -90,28 +123,11 @@ def is_uuid(val):
     return True
 
 
-def is_uuid4(val):
-    try:
-        val = uuid.UUID(val)
-    except ValueError:
-        return False
-    return val.version == 4
-
-
 class UUID(String):
 
+    default = None
     validators = (is_uuid,)
 
-    @classmethod
-    def typecast(cls, inst, val):
-        if isinstance(val, uuid.UUID):
-            val = val.hex
-        else:
-            val = uuid.UUID(val).hex
-
-        return super(UUID, cls).typecast(inst, val)
-
-
-class UUID4(UUID):
-
-    validators = (is_uuid4,)
+    @staticmethod
+    def cast_to_type(val):
+        return val.hex if isinstance(val, uuid.UUID) else uuid.UUID(val).hex

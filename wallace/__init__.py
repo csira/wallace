@@ -1,16 +1,16 @@
-from wallace.config import ConfigError, setup_app
+from wallace.config import setup_app
 from wallace.db import MongoCollection, MongoDocument, MongoPool
 from wallace.db import PostgresModel, PostgresPool, PostgresTable
 from wallace.db import ExpiringRedisHash, RedisHash, RedisSocket
-from wallace.db import Boolean, ByteArray, Float, Integer, JSON, Moment
-from wallace.db import Now, String, Unicode, UUID, UUID4
-from wallace.db import DBError, DoesNotExist, ValidationError
+from wallace.db import Array, Boolean, ByteArray, Float, Integer, JSON, Moment
+from wallace.db import Now, String, Unicode, UUID
 from wallace.errors import Error, WallaceError
+from wallace.errors import ConfigError, DBError, DoesNotExist, ValidationError
 
 
 __all__ = [
     # config
-    'setup_app',
+    'setup_app',  # deprecated
 
     # dbs / models
     'MongoCollection', 'MongoDocument', 'MongoPool',
@@ -18,8 +18,8 @@ __all__ = [
     'ExpiringRedisHash', 'RedisHash', 'RedisSocket',
 
     # types
-    'Boolean', 'ByteArray', 'Float', 'Integer', 'JSON', 'Moment', 'Now',
-     'String', 'Unicode', 'UUID', 'UUID4',
+    'Array', 'Boolean', 'ByteArray', 'Float', 'Integer', 'JSON', 'Moment',
+    'Now', 'String', 'Unicode', 'UUID',
 
     # errors
     'ConfigError', 'DBError', 'DoesNotExist', 'Error',

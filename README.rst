@@ -1,16 +1,3 @@
-.. image:: https://pypip.in/download/wallace/badge.png
-    :target: https://pypi.python.org/pypi/wallace/
-    :alt: Downloads
-
-.. image:: https://pypip.in/version/wallace/badge.png
-    :target: https://pypi.python.org/pypi/wallace/
-    :alt: Latest Version
-
-.. image:: https://pypip.in/license/wallace/badge.png
-    :target: https://pypi.python.org/pypi/wallace/
-    :alt: License
-
-
 .. _Python: http://python.org/
 
 .. _MongoDB: http://www.mongodb.com
@@ -27,111 +14,182 @@
 Wallace
 =======
 
-Wallace wraps database adapters for easy connection handling and data
-modeling in Python_ apps. We extend the enterprise libraries but do not
-override or replace their functionality, so performance profiles etc.
-remain intact. Major features include:
+Wallace is an API for modeling data with common Python_ database adaptors.
 
-* **Databases:** Currently supports PostgreSQL_ (psycopg_), Redis_ (redispy_), and MongoDB_ (pymongo_). More to come
-* **Modeling:** A bare-bones ORM, built around a consistent type interface to model attributes across backends. Use of the ORM is optional, other database and config utilities can be used without it.
-* **Caching:** Automatic connection pool sharing - set it and forget it
+* **Databases:** Supports PostgreSQL_ (psycopg_), Redis_ (redispy_), and MongoDB_ (pymongo_). More to come.
+* **Libraries:** Extends the Postgres etc. drivers but does not override them, so base interfaces and performance profiles are untouched.
+* **Cache:** Automatic connection management and sharing - set it and forget it.
+* **API:** A static typing interface to handle inbound and outbound typecasting (to/from db). Use middleware hooks for custom behavior.
+
+**Please note:** version 0.9.0 is a breaking change, freeze 0.0.9 in your pip reqs file if your code relies on it. ``wallace==0.0.9``
 
 
-Basic Usage
-~~~~~~~~~~~
+Basic Example
+~~~~~~~~~~~~~
 
-To spin up a Postgres connection pool, pass DNS connection info and an optional min/max number of connections:
+Initialize the config and set up a connection:
 
 .. code-block:: python
 
-  >>> from wallace import PostgresPool
-  >>> dns = {'host': '/tmp/', 'database': 'postgres', 'user': 'postgres', 'password': ''}
-  >>> pool = PostgresPool.construct(**dns)  # defaults to max 1 connection in the pool
+  >>> from wallace.config import App
   >>>
-  >>> # or, specifying a max pool size:
-  >>> pool = PostgresPool.construct(maxconn=5, **dns)
-  >>>
-  >>> # name the connection if you would like to cache it
-  >>> pool = PostgresPool.construct(name='my_db', **dns)
+  >>> app = App()
+  >>> app.add_postgres_connection(<dbname>, <host>, <port>, name='my_pg_conn')
 
 
-To use the standard interface, wrap a table:
+Wrap a table:
 
 .. code-block:: python
 
   >>> from wallace import PostgresTable
+  >>>
   >>> class UserTable(PostgresTable):
-  >>>     db_name = 'my_db'  # specified in `PostgresPool.construct` above
+  >>>
+  >>>     db_name = 'my_pg_conn'
   >>>     table_name = 'user'
-  >>>
-  >>> UserTable.add(name='guido', email='bdfl@python.org')
-  >>> UserTable.fetchall()
-  [{'name': 'guido', 'email': 'bdfl@python.org'}]
 
 
-And create a model to plug the table like so:
+Model a row:
 
 .. code-block:: python
 
-  >>> from wallace import PostgresModel, String
+  >>> from wallace import PostgresModel
+  >>> from wallace import Integer, String
+  >>>
+  >>>
   >>> class User(PostgresModel):
+  >>>
   >>>     table = UserTable
-  >>>     name = String()
-  >>>     email = String(pk=True)  # primary key field
   >>>
-  >>> # models may be used to retrieve existing records,
-  >>> u = User.fetch(email='bdfl@python.org')
-  >>> u.name
-  'guido'
-  >>>
-  >>> # create new ones,
-  >>> newguy = User.construct(name='spacemanspiff', email='spaceman@spiff.com')
-  >>> newguy.push()
-  >>>
-  >>> # and execute searches
-  >>> [u.email for u in User.find_all(name='spacemanspiff')]
-  ['spaceman@spiff.com']
+  >>>     first_name = String()
+  >>>     last_name = String()
+  >>>     email = String(pk=True)  # primary key
+  >>>     age = Integer()
 
 
-*'push'* to update a model:
+Insert a row:
 
 .. code-block:: python
 
-  >>> u.email = 'other_guy@python.org'
-  >>> u.push()
+  >>> user = User.construct(
+  >>>     first_name='john', last_name='cleese',
+  >>>     email='foo@bar.com', age=50)
   >>>
-  >>> User.fetch(email='guido@python.org')
-  Traceback (most recent call last):
-  ...
-  wallace.db.base.errors.DoesNotExist
-  >>>
-  >>> print User.fetch(email='other_guy@python.org').name
-  'guido'
+  >>> user.save()
 
 
-*'delete'* to delete:
+Fetch a row:
 
 .. code-block:: python
 
-  >>> me.delete()
-  >>> User.fetch(email='other_guy@python.org')
-  Traceback (most recent call last):
-  ...
-  wallace.db.base.errors.DoesNotExist
+  >>> user = User.fetch(email='foo@bar.com')
+  >>> user.first_name, user.last_name
+  ('john', 'cleese')
 
+
+Update, find, delete:
+
+.. code-block:: python
+
+  >>> user = User.fetch(email='foo@bar.com')
+  >>> user.age += 1
+  >>> user.save()
+  >>>
+  >>> [u.email for u in User.find_all(first_name='john')]
+  ['foo@bar.com']
+  >>>
+  >>> user.delete()
+
+
+Patterns, types, etc. are consistent
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Use the same type-descriptors, connection registration, etc. for all the
+database drivers wrapped by Wallace. Compare Redis here to Postgres above:
+
+.. code-block:: python
+
+  >>> import time
+  >>> import uuid
+  >>>
+  >>> from wallace import ExpiringRedisHash
+  >>> from wallace import Integer, Moment, Now, UUID
+  >>> from wallace.config import get_app
+  >>>
+  >>> app = get_app()
+  >>> app.add_redis_connection('0.0.0.0', port=6379, name='my_redis_conn')
+  >>>
+  >>> class WebSession(ExpiringRedisHash):
+  >>>
+  >>>     db_name = 'my_redis_conn'
+  >>>     ttl = 60 * 60
+  >>>
+  >>>     session_id = UUID(key=True, default=lambda: uuid.uuid4())
+  >>>     created_at = Now()
+  >>>     last_authed_at = Moment(default=None)
+  >>>     user_id = Integer(default=None)
+  >>>
+  >>>     def login(self, user_id):
+  >>>         self.user_id = user_id
+  >>>         self.last_authed_at = int(time.time())
+  >>>         self.save()
+
+
+Use connections directly
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Grab a registered connection and use it directly any time:
+
+.. code-block:: python
+
+  >>> from wallace.config import get_connection
+  >>>
+  >>> conn = get_connection('my_redis_conn')
+  >>> with conn.pipeline() as pipe:
+  >>>     pipe.rpush('mylist', 1)
+  >>>     pipe.rpush('mylist', 2)
+  >>>     pipe.rpush('mylist', 3)
+  >>>     pipe.execute()
+  >>>
+  >>> print conn.lpop('mylist')
+  1
+
+
+Create a custom type
+~~~~~~~~~~~~~~~~~~~~
+
+Wallace comes pre-packaged with type-descriptors for some common
+Python primitives. They're easy to subclass in order to achieve more specific
+behavior:
+
+.. code-block:: python
+
+  >>> from wallace import RedisHash, Integer, String
+  >>>
+  >>>
+  >>> class CardRank(Integer):
+  >>>
+  >>>     default = None
+  >>>     validators = ( lambda val: val > 1, lambda val < 10, )
+  >>>
+  >>>
+  >>> suits = ['hearts', 'spades', 'diamonds', 'clubs']
+  >>>
+  >>> class PlayingCard(RedisHash):
+  >>>
+  >>>     suit = String(validators=( lambda val: val in suits, ))
+  >>>     rank = CardRank()
+  >>>
+  >>>     @property
+  >>>     def key(self):
+  >>>         return "{}-of-{}".format(rank, suit)
+
+DataType can be subclasses directly too.
 
 Download and Install
 ~~~~~~~~~~~~~~~~~~~~
 
-``pip install wallace`` to install the latest stable release.
-
-
-License
-~~~~~~~
-
-.. __: https://github.com/csira/wallace/raw/master/LICENSE.txt
-
-Code, tutorials, and documentation for wallace are all open source under the BSD__ license.
+The latest stable release is always on PyPI. ``pip install wallace``
 
 
 *Enjoy your data.*

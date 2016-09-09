@@ -5,7 +5,7 @@ from psycopg2.extras import RealDictCursor
 from psycopg2.pool import ThreadedConnectionPool
 
 from wallace.config import register_connection
-from wallace.db.base import DBError, ValidationError
+from wallace.errors import DBError, ValidationError
 
 
 def _error_msg(err):
@@ -18,9 +18,9 @@ def _catch(f):
         try:
             return f(*a, **kw)
         except psycopg2.IntegrityError, err:
-            raise ValidationError(_error_msg(err))
+            raise ValidationError(601, _error_msg(err))
         except psycopg2.Error, err:
-            raise DBError(_error_msg(err))
+            raise DBError(602, _error_msg(err))
     return wrap
 
 

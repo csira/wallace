@@ -1,24 +1,30 @@
 from setuptools import find_packages, setup
 
 
+# python setup.py test
+# python setup.py sdist
+# python setup.py bdist_wheel
+# python setup.py sdist bdist_wheel upload
+
+
 long_desc = '''\
-Wallace is a wrapper for the Postgres, Redis, and Mongo database adapters.
-It focuses on connection utilities and table-level abstractions but offers
-a mini-ORM built around consistent attribute type declarations across
-backends.
+Wallace is an API for modeling data with the Postgres (psycopg2), Redis (redis-py)
+and Mongo (pymongo) database adaptors.
 '''
 
+packages = [pkg for pkg in find_packages() if pkg.startswith('wallace')]
 
 if __name__ == '__main__':
     setup(
-        packages=find_packages(),
+        # packages=find_packages(),
+        packages=packages,
         name='Wallace',
-        version='0.1.0',
+        version='0.9.0',
         author='Christopher Sira',
         author_email='cbsira@gmail.com',
         license='BSD',
         url='https://github.com/csira/wallace',
-        description='Connection utilities, mini-ORM for PostgreSQL, Redis, and MongoDB.',
+        description='An API for modeling data with psycopg2, redis-py, and pymongo.',
         long_description=long_desc,
         install_requires=[
             'psycopg2',

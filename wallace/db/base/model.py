@@ -1,10 +1,12 @@
 from contextlib import contextmanager
 
-from wallace.db.base.attrs import DataType
-from wallace.db.base.errors import DoesNotExist
+from wallace.db.base.attrs.base import DataType
+from wallace.db.base.middleware import Middleware
+from wallace.errors import DoesNotExist
 
 
 class Base(type):
+
     def __new__(cls, name, bases, dct):
         for key, val in dct.iteritems():
             if isinstance(val, DataType):
@@ -18,7 +20,7 @@ class Base(type):
     def _get_defaults(bases, dct):
         defaults = {}
 
-        for base in bases:  # handle model inheritance
+        for base in bases:  # for model inheritance
             for key, val in getattr(base, '_cbs_default_fields', []):
                 defaults[key] = val
 
@@ -26,7 +28,7 @@ class Base(type):
             if isinstance(val, DataType) and val.default is not None:
                 defaults[key] = val.default
             elif key in defaults:  # catch superclass fields declared with a
-                defaults.pop(key)  # default but overridden without one here
+                defaults.pop(key)  # default but overridden without one
 
         return tuple(defaults.items())
 
@@ -35,9 +37,7 @@ class Model(object):
 
     __metaclass__ = Base
 
-    @classmethod
-    def fetch(cls):
-        raise NotImplementedError
+    middleware = None
 
     @classmethod
     def new(cls):
@@ -51,14 +51,23 @@ class Model(object):
         return inst
 
     @classmethod
+    def fetch(cls, **kw):
+        inst = cls.construct(new=False, **kw)
+        return inst.pull()
+
+    @classmethod
     def construct(cls, new=True, **kwargs):
         if new:
             inst = cls.new()
-            inst._set_multiple_values(**kwargs)
+            inst.multiset(**kwargs)
         else:
             inst = cls()
             inst._set_inbound_db_data(**kwargs)
         return inst
+
+    @classmethod
+    def exists(cls, **kw):
+        raise NotImplementedError
 
     def __init__(self):
         self._cbs_db_data = {}
@@ -73,12 +82,11 @@ class Model(object):
 
     @property
     def is_modified(self):
-        if self._cbs_deleted or self._cbs_updated:
-            return True
-        return False
+        return not self.is_new and (self._cbs_deleted or self._cbs_updated)
 
     def is_attr_modified(self, attr):
-        return (attr in self._cbs_deleted or attr in self._cbs_updated)
+        return not self.is_new and (
+            attr in self._cbs_deleted or attr in self._cbs_updated)
 
     @property
     def raw(self):
@@ -88,25 +96,9 @@ class Model(object):
             data[attr] = None
         return data
 
-
-    @contextmanager
-    def _guard_state_for_inbound_db_data(self):
-        self._cbs_is_db_data_inbound = True
-        try:
-            yield
-        finally:
-            self._cbs_is_db_data_inbound = False
-
-    def _set_multiple_values(self, **kwargs):
+    def multiset(self, **kwargs):
         for attr, val in kwargs.iteritems():
             setattr(self, attr, val)
-
-    def _set_inbound_db_data(self, **kwargs):
-        with self._guard_state_for_inbound_db_data():
-            self._set_multiple_values(**kwargs)
-
-    def multiset(self, **kwargs):
-        self._set_multiple_values(**kwargs)
         return self
 
 
@@ -135,33 +127,39 @@ class Model(object):
         if attr in self._cbs_updated:
             self._cbs_updated.pop(attr)
 
-        if not self._cbs_is_new and not self._cbs_is_db_data_inbound:
+        if not self.is_new and not self._cbs_is_db_data_inbound:
             self._cbs_deleted.add(attr)
 
 
-    def pull(self):
-        if self._cbs_is_new:
-            raise DoesNotExist('new record, push first')
+    def reload(self, **kw):
+        return self.pull(**kw)
 
-        data = self._read_data()
+    def pull(self, **kw):
+        if self.is_new:
+            raise DoesNotExist(201, 'new record, push first')
+
+        data = self.read_from_db(**kw)
         if not data:
-            raise DoesNotExist
+            raise DoesNotExist(203)
 
         self._set_inbound_db_data(**data)
 
         return self
 
-    def _read_data(self):
+    def read_from_db(self, **kw):
         raise NotImplementedError
 
 
-    def push(self, *a, **kw):
-        with self._state_mgr_for_writes() as (state, changes,):
-            self._write_data(state, changes, *a, **kw)
+    def save(self, **kw):
+        return self.push(**kw)
+
+    def push(self, **kw):
+        with self._protect_internal_state() as (state, changes,):
+            self.write_to_db(state, changes, **kw)
         return self
 
     @contextmanager
-    def _state_mgr_for_writes(self):
+    def _protect_internal_state(self):
         state = dict(self._cbs_db_data)
         state.update(self._cbs_updated)
         changes = dict(self._cbs_updated)
@@ -175,7 +173,7 @@ class Model(object):
         self._cbs_is_new = False
         self.rollback()
 
-    def _write_data(self, state, changes, *a, **kw):
+    def write_to_db(self, state, changes, **kw):
         raise NotImplementedError
 
 
@@ -185,4 +183,13 @@ class Model(object):
         return self
 
     def delete(self):
-        raise NotImplementedError
+        if self.is_new:
+            raise DoesNotExist(202, 'new model')
+
+
+    def _set_inbound_db_data(self, **kw):
+        self._cbs_is_db_data_inbound = True
+        try:
+            self.multiset(**kw)
+        finally:
+            self._cbs_is_db_data_inbound = False
