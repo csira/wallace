@@ -1,10 +1,8 @@
 from setuptools import find_packages, setup
 
 
-# python setup.py test
 # python setup.py sdist
-# python setup.py bdist_wheel
-# python setup.py sdist bdist_wheel upload
+# python setup.py sdist upload
 
 
 long_desc = '''\

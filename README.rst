@@ -170,7 +170,7 @@ behavior:
   >>> class CardRank(Integer):
   >>>
   >>>     default = None
-  >>>     validators = ( lambda val: val > 1, lambda val < 10, )
+  >>>     validators = ( lambda val: val > 1, lambda val: val < 10, )
   >>>
   >>>
   >>> suits = ['hearts', 'spades', 'diamonds', 'clubs']
@@ -182,7 +182,7 @@ behavior:
   >>>
   >>>     @property
   >>>     def key(self):
-  >>>         return "{}-of-{}".format(rank, suit)
+  >>>         return "{}-of-{}".format(self.rank, self.suit)
 
 DataType can be subclasses directly too.
 
