@@ -14,12 +14,7 @@
 Wallace
 =======
 
-Wallace is an API for modeling data with common Python_ database adaptors.
-
-* **Databases:** Supports PostgreSQL_ (psycopg_), Redis_ (redispy_), and MongoDB_ (pymongo_). More to come.
-* **Libraries:** Extends the Postgres etc. drivers but does not override them, so base interfaces and performance profiles are untouched.
-* **Cache:** Automatic connection management and sharing - set it and forget it.
-* **API:** A static typing interface to handle inbound and outbound typecasting (to/from db). Use middleware hooks for custom behavior.
+Wallace is an API for modeling data. Supports PostgreSQL_ (psycopg_), Redis_ (redispy_), and MongoDB_ (pymongo_).
 
 **Please note:** version 0.9.0 is a breaking change, freeze 0.0.9 in your pip reqs file if your code relies on it. ``wallace==0.0.9``
 
@@ -101,11 +96,11 @@ Update, find, delete:
   >>> user.delete()
 
 
-Patterns, types, etc. are consistent
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Consistent patterns, etc.
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Use the same type-descriptors, connection registration, etc. for all the
-database drivers wrapped by Wallace. Compare Redis here to Postgres above:
+database drivers wrapped by Wallace. Compare Redis:
 
 .. code-block:: python
 
@@ -135,7 +130,7 @@ database drivers wrapped by Wallace. Compare Redis here to Postgres above:
   >>>         self.save()
 
 
-Use connections directly
+Fetch a connection
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Grab a registered connection and use it directly any time:
@@ -157,10 +152,6 @@ Grab a registered connection and use it directly any time:
 
 Create a custom type
 ~~~~~~~~~~~~~~~~~~~~
-
-Wallace comes pre-packaged with type-descriptors for some common
-Python primitives. They're easy to subclass in order to achieve more specific
-behavior:
 
 .. code-block:: python
 
@@ -184,7 +175,6 @@ behavior:
   >>>     def key(self):
   >>>         return "{}-of-{}".format(self.rank, self.suit)
 
-DataType can be subclasses directly too.
 
 Download and Install
 ~~~~~~~~~~~~~~~~~~~~
