@@ -85,8 +85,7 @@ class Model(object):
         return not self.is_new and (self._cbs_deleted or self._cbs_updated)
 
     def is_attr_modified(self, attr):
-        return not self.is_new and (
-            attr in self._cbs_deleted or attr in self._cbs_updated)
+        return not self.is_new and (attr in self._cbs_deleted or attr in self._cbs_updated)
 
     @property
     def raw(self):

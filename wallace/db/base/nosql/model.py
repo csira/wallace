@@ -6,37 +6,61 @@ from wallace.errors import DoesNotExist, SetupError, ValidationError
 class NoSqlBase(Base):
 
     def __new__(cls, name, bases, dct):
-        key = dct.get('key')
-
-        if key:
-            if not isinstance(key, property) and not isinstance(key, DataType):
-                raise SetupError(503)
-        else:
-            field = None
-
-            for key, val in dct.iteritems():
-                if isinstance(val, DataType) and val.is_key:
-                    if field:
-                        raise SetupError(502)
-                    field = key
-
-            if field:
-                dct['_cbs_key_field'] = field
-                key = dct['key'] = property(lambda self: getattr(self, field))
-
-        if not key:  # comb superclasses
-            for base in bases:
-                has_key = hasattr(base, 'key')
-                if has_key:  # will inherit naturally
-                    break
-
-                field = base.get('_cbs_key_field')
-                if field:
-                    dct['_cbs_key_field'] = field
-                    key = dct['key'] = property(lambda self: getattr(self, field))
-                    break
+        is_found = cls._find_key_field_or_property(dct)
+        if not is_found:
+            is_found = cls._find_parameter(dct)
+        if not is_found:
+            cls._comb_superclasses(bases, dct)
 
         return super(NoSqlBase, cls).__new__(cls, name, bases, dct)
+
+    @staticmethod
+    def _find_key_field_or_property(dct):
+        key = dct.get('key')
+        if not key:
+            return False
+
+        if not isinstance(key, property) and not isinstance(key, DataType):
+            raise SetupError(503)
+
+        return True
+
+    @classmethod
+    def _find_parameter(cls, dct):
+        '''Search for the 'key=True' case, and confirm no more than one parameter has that property.'''
+
+        num_found = 0
+        field = None
+
+        for key, val in dct.iteritems():
+            if isinstance(val, DataType) and val.is_key:
+                field = key
+                num_found += 1
+
+        if num_found > 1:
+            raise SetupError(502)
+        elif num_found == 0:
+            return False
+
+        dct['_cbs_key_field'] = field
+        dct['key'] = cls._build_prop(field)
+        return True
+
+    @classmethod
+    def _comb_superclasses(cls, bases, dct):
+        for base in bases:
+            if hasattr(base, 'key'):
+                break  # will inherit naturally
+
+            field = getattr(base, '_cbs_key_field', '')
+            if field:
+                dct['_cbs_key_field'] = field
+                dct['key'] = cls._build_prop(field)
+                break
+
+    @staticmethod
+    def _build_prop(field):
+        return property(lambda self: getattr(self, field))
 
 
 class NoSqlModel(Model):
@@ -70,11 +94,6 @@ class NoSqlModel(Model):
             @property
             def key(self):
                 return "{}|{}".format(self.first_name, self.last_name)
-
-    NB: This model is not currently appropriate for implementing records stored
-    with a composite key. While it's possible to make composite-like keys by
-    creating a property that uses 2+ fields (a la example above), the
-    key property still returns only a single value.
 
     '''
 
