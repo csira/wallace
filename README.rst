@@ -133,8 +133,6 @@ database drivers wrapped by Wallace. Compare Redis:
 Fetch a connection
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Grab a registered connection and use it directly any time:
-
 .. code-block:: python
 
   >>> from wallace.config import get_connection
