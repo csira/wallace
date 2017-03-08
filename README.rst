@@ -14,9 +14,9 @@
 Wallace
 =======
 
-Wallace is an API for modeling data. Supports PostgreSQL_ (psycopg_), Redis_ (redispy_), and MongoDB_ (pymongo_).
+Wallace is an API for modeling data. It supports PostgreSQL_ (psycopg_), Redis_ (redispy_), and MongoDB_ (pymongo_).
 
-**Please note:** version 0.9.0 is a breaking change, freeze 0.0.9 in your pip reqs file if your code relies on it. ``wallace==0.0.9``
+**Please note:** version 0.9.* is a breaking change, freeze 0.0.9 in your pip reqs file if your code relies on it. ``wallace==0.0.9``
 
 
 Basic Example
@@ -50,7 +50,6 @@ Model a row:
 
   >>> from wallace import PostgresModel
   >>> from wallace import Integer, String
-  >>>
   >>>
   >>> class User(PostgresModel):
   >>>
@@ -121,7 +120,7 @@ database drivers wrapped by Wallace. Compare Redis:
   >>>
   >>>     session_id = UUID(key=True, default=lambda: uuid.uuid4())
   >>>     created_at = Now()
-  >>>     last_authed_at = Moment(default=None)
+  >>>     last_authed_at = Moment()
   >>>     user_id = Integer(default=None)
   >>>
   >>>     def login(self, user_id):
@@ -153,20 +152,26 @@ Create a custom type
 
 .. code-block:: python
 
-  >>> from wallace import RedisHash, Integer, String
+  >>> from wallace import RedisHash, String
+  >>>
+  >>> SUITS = ("hearts", "spades", "diamonds", "clubs")
   >>>
   >>>
-  >>> class CardRank(Integer):
+  >>> def validate_cardrank(test_str):
+  >>>     if test_str.isdigit():
+  >>>         test_num = int(test_str)
+  >>>         return test_num > 1 and test_num < 10
+  >>>     return test_str in ("J", "Q", "K", "A")
+  >>>
+  >>> class CardRank(String):
   >>>
   >>>     default = None
-  >>>     validators = ( lambda val: val > 1, lambda val: val < 10, )
+  >>>     validators = (validate_cardrank,)
   >>>
-  >>>
-  >>> suits = ['hearts', 'spades', 'diamonds', 'clubs']
   >>>
   >>> class PlayingCard(RedisHash):
   >>>
-  >>>     suit = String(validators=( lambda val: val in suits, ))
+  >>>     suit = String(validators=( lambda val: val in SUITS, ))
   >>>     rank = CardRank()
   >>>
   >>>     @property
