@@ -17,7 +17,7 @@ if __name__ == '__main__':
         # packages=find_packages(),
         packages=packages,
         name='Wallace',
-        version='0.9.0',
+        version='0.9.1',
         author='Christopher Sira',
         author_email='cbsira@gmail.com',
         license='BSD',
