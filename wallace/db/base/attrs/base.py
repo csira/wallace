@@ -1,6 +1,8 @@
 from wallace.db.base.attrs.interface import ModelInterface
-from wallace.db.base.attrs.validator_mixin import ValidatorMixin
+from wallace.db.base.attrs.utils import validate_default, check_validators, validate
 from wallace.errors import ValidationError, WallaceError
+
+empty_sentinel = object()
 
 
 class _Base(type):
@@ -24,39 +26,77 @@ class _Base(type):
         if not isinstance(cls.data_type, type):
             raise ValidationError(309)
 
-        cls._validate_default()
+        if not isinstance(cls.nullable, bool):
+            raise ValidationError(310)
 
-    def _validate_default(cls):
-        default = cls.default() if callable(cls.default) else cls.default
-        if default is None:
-            return
-
-        cls._handle_typing(default)
-
-        for func in cls.validators:
-            if not func(default):
-                msg = 'default "{}" does not validate'.format(default)
-                raise ValidationError(302, msg)
+        check_validators(cls.validators)
+        validate_default(cls.default, cls.data_type, cls.nullable, cls.validators)
 
 
-class DataType(ModelInterface, ValidatorMixin):
+class DataType(ModelInterface):
 
     __metaclass__ = _Base
 
     data_type = None
+    default = None
+    nullable = True
+    validators = ()
 
-    def __init__(self, validators=None, default=None, pk=False, key=False):
+    def __init__(self, pk=False, key=False, validators=empty_sentinel,
+            default=empty_sentinel, nullable=empty_sentinel):
+
         if self.__class__.__name__ == 'DataType':
             raise WallaceError(303, "DataType cannot be used directly")
 
-        ValidatorMixin.__init__(self, validators)
+        self.validators = self._get_validators(validators)
+        self.nullable = self._get_nullable_flag(nullable)
+        default = self._get_default(default, self.nullable, self.validators)
+
         ModelInterface.__init__(self, pk=pk, key=key, default=default)
 
-        if self.default is not None:  # validation only, the model instance doesn't exist yet
-            val = self.default() if callable(self.default) else self.default
-            if val is not None:
-                val = self._handle_typing(val)
-                self.validate(val)
+    @classmethod
+    def _get_validators(cls, validators):
+        if validators == empty_sentinel:
+            return cls.validators
+
+        check_validators(validators)
+
+        if validators:
+            cls_level = cls.validators + ()  # work-around for tuple deep-copy
+            return cls_level + tuple(validators)
+
+        return cls.validators
+
+    @classmethod
+    def _get_nullable_flag(cls, nullable):
+        if nullable == empty_sentinel:
+            return cls.nullable
+
+        if not isinstance(nullable, bool):
+            raise ValidationError(311)
+
+        return nullable
+
+    @classmethod
+    def _get_default(cls, default, nullable, validators):
+        if default == empty_sentinel:
+            default = cls.default
+
+        if default is None and not nullable:
+            raise ValidationError(313)
+
+        validate_default(default, cls.data_type, nullable, validators)
+        return default
+
+
+    def __get__(self, inst, owner):
+        val = super(DataType, self).__get__(inst, owner)
+        return self.after_get(val)
+
+    @staticmethod
+    def after_get(val):
+        return val
+
 
     def __set__(self, inst, val):
         if val is None:
@@ -66,23 +106,43 @@ class DataType(ModelInterface, ValidatorMixin):
         if inst.middleware:
             val = inst.middleware.cast(self.data_type, val)
 
-        val = self._handle_typing(val)
+        try:
+            val = self.before_set(val)
+        except ValueError as err:
+            raise ValidationError(304, err.message)
+        except TypeError as err:
+            raise ValidationError(304, err.message)
 
-        self.validate(val)
+        if not isinstance(val, self.data_type):
+            raise ValidationError(304)
+
+        validate(val, *self.validators)
         super(DataType, self).__set__(inst, val)
 
-    @classmethod
-    def _handle_typing(cls, val):
-        if isinstance(val, cls.data_type):
-            return val
+    @staticmethod
+    def before_set(val):
+        return val
 
-        val = cls.cast_to_type(val)
+
+    def __delete__(self, inst):
+        if not self.nullable:
+            raise ValidationError(312)
+        super(DataType, self).__delete__(inst)
+
+
+    @classmethod
+    def _for_testing_inbound(cls, val):
+        if val is None:
+            if self.nullable:
+                return
+            raise ValidationError(312)
+
+        try:
+            val = cls.before_set(val)
+        except ValueError as err:
+            raise ValidationError(304, err.message)
+        except TypeError as err:
+            raise ValidationError(304, err.message)
 
         if not isinstance(val, cls.data_type):
             raise ValidationError(304)
-
-        return val
-
-    @staticmethod
-    def cast_to_type(val):
-        raise ValidationError(308)

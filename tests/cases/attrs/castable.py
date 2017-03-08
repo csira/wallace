@@ -15,9 +15,9 @@ uid_val4 = uuid.uuid4().hex
 
 CASTABLE = [
     (Array, ([], []), ([1, 2, 3], [1, 2, 3]), ((1, 2), [1, 2])),
-    (Boolean, (True, True), (0, False), (0.0, False), (1, True)),
+    # (Boolean, (True, True), (0, False), (0.0, False), (1, True)),
     (Float, (1.0, 1.0), (3.4, 3.4), (1, 1.0)),
-    (Integer, (7, 7), (5.0, 5)),
+    (Integer, (7, 7), (5.0, 5), ('2', 2)),
     (JSON, ),
     (String, ('abc', 'abc'), ('', ''), (r'abc', 'abc')),
     (Unicode, (u"abc", u"abc"), ('abc', u'abc'), (r'abc', u'abc')),
@@ -28,7 +28,7 @@ CASTABLE = [
 def create_test(cls, test_val, expected):
     @register
     def test_cast_success():
-        cls._handle_typing(test_val) == expected
+        cls.before_set(test_val) == expected
 
 
 for item in CASTABLE:

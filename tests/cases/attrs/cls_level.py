@@ -13,12 +13,12 @@ def test_missing_data_type():
 
 
 @register
-@should_throw(ValidationError, 308)
+@should_throw(ValidationError, 304)
 def test_no_match():
     class MyType(DataType):
         data_type = str
 
-    MyType._handle_typing([1,2,3])
+    MyType._for_testing_inbound([1,2,3])
 
 
 @register
@@ -27,13 +27,13 @@ def test_castable():
         data_type = int
 
         @staticmethod
-        def cast_to_type(val):
+        def before_set(val):
             if isinstance(val, float):
                 if int(val) == val:
                     return int(val)
-            raise ValidationError(308)
+            raise ValidationError(304)
 
-    assert MyType._handle_typing(1.0) == 1
+    assert MyType.before_set(1.0) == 1
 
 
 @register
@@ -51,7 +51,7 @@ def test_defaut_validates():
 
 
 @register
-@should_throw(ValidationError, 308)
+@should_throw(TypeError)
 def test_default_does_not_validate():
     class MyType(DataType):
         data_type = int

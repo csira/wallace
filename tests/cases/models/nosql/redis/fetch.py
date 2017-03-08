@@ -16,7 +16,8 @@ def _make_model_without_key():
         key = String()
         test_int = Integer()
         test_str = String()
-    inst = TestModel.construct(key='key', test_int=123, test_str='abc').push()
+    inst = TestModel.construct(key='key', test_int=123, test_str='abc')
+    inst.push()
     return TestModel, inst.key
 
 
@@ -30,11 +31,12 @@ def _make_model_with_key():
         def key(self):
             return '{}|{}'.format(self.test_str, str(self.test_int))
 
-    inst = TestModel.construct(test_int=123, test_str='abc').push()
+    inst = TestModel.construct(test_int=123, test_str='abc')
+    inst.push()
     return TestModel, inst.key
 
 
-@register
+# @register
 @set_up_and_tear_down
 def fetch_with_key_without_property():
     model, key = _make_model_without_key()

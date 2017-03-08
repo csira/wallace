@@ -9,18 +9,18 @@ from wallace.errors import ValidationError
 NOT_CASTABLE = [
     (Array, 1, '123', '', {}, "[1, 2, 3]"),
     (Boolean, (), [], {}, 'True', 2, ''),
-    (Float, '', 'abc', [], '3.9', None),
-    (Integer, '4.1', 'abc', [], '4', None),
-    (String, 1, 4.2, []),
-    (Unicode, 1, []),
+    (Float, '', 'abc', [],),
+    (Integer, '4.1', 'abc', [],),
+    (String, 1, 4.2, [], {}, ),
+    (Unicode, 1, [], {}),
 ]
 
 
 def create_test(cls, val):
     @register
-    @should_throw(ValidationError, 308)
+    @should_throw(ValidationError, 304)
     def test_cast_fails():
-        cls._handle_typing(val)
+        cls._for_testing_inbound(val)
 
 
 for item in NOT_CASTABLE:
@@ -32,10 +32,10 @@ for item in NOT_CASTABLE:
 @register
 @should_throw(AttributeError)
 def test_uuid1():
-    UUID._handle_typing(1)
+    UUID._for_testing_inbound(1)
 
 
 @register
 @should_throw(AttributeError)
 def test_uuid2():
-    UUID._handle_typing([])
+    UUID._for_testing_inbound([])

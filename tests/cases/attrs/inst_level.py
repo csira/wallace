@@ -35,7 +35,7 @@ def test_set_none_is_delete():
 
 
 @register
-@should_throw(ValidationError, 305)
+@should_throw(ValidationError, 302)
 def test_set_value_if_validator_fails():
     class TestModel(Model):
         my_val = String(validators=(lambda val: len(val) < 4,))
@@ -75,7 +75,7 @@ def test_validator_merge():
 
 
 @register
-@should_throw(ValidationError, 305)
+@should_throw(ValidationError, 302)
 def test_default_fails_1():
     class MyType(DataType):
         data_type = int
@@ -85,7 +85,7 @@ def test_default_fails_1():
 
 
 @register
-@should_throw(ValidationError, 305)
+@should_throw(ValidationError, 302)
 def test_default_fails_2():
     class MyType(DataType):
         data_type = int
@@ -95,7 +95,7 @@ def test_default_fails_2():
 
 
 @register
-@should_throw(ValidationError, 305)
+@should_throw(ValidationError, 302)
 def test_default_fails_3():
     class MyType(DataType):
         data_type = int

@@ -1,16 +1,12 @@
 class ModelInterface(object):
 
-    default = None
-
     def __init__(self, pk=False, key=False, default=None):
         self.attr = None
         self.is_pk = pk
         self.is_key = key
+        self.default = default
 
-        if default is not None:
-            self.default = default
-
-    def __get__(self, inst, owner):
+    def __get__(self, inst, _):
         return inst._get_attr(self.attr)
 
     def __set__(self, inst, val):

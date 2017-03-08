@@ -13,26 +13,15 @@ class Array(DataType):
     data_type = list
 
     @staticmethod
-    def cast_to_type(val):
-        if isinstance(val, tuple):
-            return list(val)
-        raise ValidationError(308)
+    def before_set(val):
+        return list(val) if isinstance(val, tuple) else val
 
 
 class Boolean(DataType):
 
     default = False
     data_type = bool
-
-    @staticmethod
-    def cast_to_type(val):
-        if isinstance(val, int) or isinstance(val, float):
-            if val == 0:
-                return False
-            elif val == 1:
-                return True
-
-        raise ValidationError(308)
+    nullable = False
 
 
 class ByteArray(DataType):
@@ -47,10 +36,8 @@ class Float(DataType):
     data_type = float
 
     @staticmethod
-    def cast_to_type(val):
-        if isinstance(val, int):
-            return float(val)
-        raise ValidationError(308)
+    def before_set(val):
+        return float(val) if not isinstance(val, float) else val
 
 
 class Integer(DataType):
@@ -59,11 +46,11 @@ class Integer(DataType):
     data_type = int
 
     @staticmethod
-    def cast_to_type(val):
+    def before_set(val):
         if isinstance(val, float):
             if int(val) == val:
                 return int(val)
-        raise ValidationError(308)
+        return int(val)
 
 
 class Moment(Integer):
@@ -74,18 +61,13 @@ class Moment(Integer):
 class Now(Moment):
 
     default = lambda: int(time.time())
+    nullable = False
 
 
 class String(DataType):
 
     default = ""
     data_type = str
-
-    @staticmethod
-    def cast_to_type(val):
-        if isinstance(val, basestring):
-            return str(val)
-        raise ValidationError(308)
 
 
 class Unicode(DataType):
@@ -94,9 +76,9 @@ class Unicode(DataType):
     data_type = unicode
 
     @staticmethod
-    def cast_to_type(val):
+    def before_set(val):
         if not isinstance(val, basestring):
-            raise ValidationError(308)
+            raise ValidationError(304)
 
         try:
             return unicode(val)
@@ -106,12 +88,12 @@ class Unicode(DataType):
 
 class JSON(String):
 
-    def __get__(self, inst, owner):
-        serialized = super(JSON, self).__get__(inst, owner)
+    @staticmethod
+    def after_get(serialized):
         return ujson.loads(serialized) if serialized else serialized
 
     @staticmethod
-    def cast_to_type(val):
+    def before_set(val):
         return ujson.dumps(val)
 
 
@@ -129,5 +111,5 @@ class UUID(String):
     validators = (is_uuid,)
 
     @staticmethod
-    def cast_to_type(val):
+    def before_set(val):
         return val.hex if isinstance(val, uuid.UUID) else uuid.UUID(val).hex

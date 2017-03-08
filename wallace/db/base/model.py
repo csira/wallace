@@ -1,7 +1,6 @@
 from contextlib import contextmanager
 
 from wallace.db.base.attrs.base import DataType
-from wallace.db.base.middleware import Middleware
 from wallace.errors import DoesNotExist
 
 
@@ -53,7 +52,8 @@ class Model(object):
     @classmethod
     def fetch(cls, **kw):
         inst = cls.construct(new=False, **kw)
-        return inst.pull()
+        inst.pull()
+        return inst
 
     @classmethod
     def construct(cls, new=True, **kwargs):
@@ -131,11 +131,11 @@ class Model(object):
 
 
     def reload(self, **kw):
-        return self.pull(**kw)
+        self.pull(**kw)
 
     def pull(self, **kw):
         if self.is_new:
-            raise DoesNotExist(201, 'new record, push first')
+            raise DoesNotExist(201, 'new record, does not exist in DB')
 
         data = self.read_from_db(**kw)
         if not data:
@@ -143,19 +143,16 @@ class Model(object):
 
         self._set_inbound_db_data(**data)
 
-        return self
-
     def read_from_db(self, **kw):
         raise NotImplementedError
 
 
     def save(self, **kw):
-        return self.push(**kw)
+        self.push(**kw)
 
     def push(self, **kw):
         with self._protect_internal_state() as (state, changes,):
             self.write_to_db(state, changes, **kw)
-        return self
 
     @contextmanager
     def _protect_internal_state(self):
@@ -179,7 +176,6 @@ class Model(object):
     def rollback(self):
         self._cbs_deleted = set()
         self._cbs_updated = {}
-        return self
 
     def delete(self):
         if self.is_new:
