@@ -14,13 +14,24 @@
 Wallace
 =======
 
-Wallace is an API for modeling data. It supports PostgreSQL_ (psycopg_), Redis_ (redispy_), and MongoDB_ (pymongo_).
+Wallace is a Python API for modeling data.
+It was designed to sit in the space between direct database access -
+``data = redis.Redis().hgetall("foo")`` - and full ORMs.
+Use it to construct, manage, and manipulate domain models consistently for
+the PostgreSQL_ (psycopg_), Redis_ (redispy_), and MongoDB_ (pymongo_) database
+adaptors, without abstracting away performance considerations or making
+assumptions about underlying data storage.
 
 **Please note:** version 0.9.* is a breaking change, freeze 0.0.9 in your pip reqs file if your code relies on it. ``wallace==0.0.9``
 
 
-Basic Example
-~~~~~~~~~~~~~
+Basic SQL Example
+~~~~~~~~~~~~~~~~~
+
+To use Wallace while building your app there are only two requirements:
+set up database connections, and implement your models.
+As an additional step in the Postgres case, a representation for the table
+is required, and likewise for a Mongo collection.
 
 Initialize the config and set up a connection:
 
@@ -29,10 +40,10 @@ Initialize the config and set up a connection:
   >>> from wallace.config import App
   >>>
   >>> app = App()
-  >>> app.add_postgres_connection(<dbname>, <host>, <port>, name='my_pg_conn')
+  >>> app.add_postgres_connection(<dbname>, <host>, <port>, name="my_pg_conn")
 
 
-Wrap a table:
+Wrap the table:
 
 .. code-block:: python
 
@@ -40,8 +51,8 @@ Wrap a table:
   >>>
   >>> class UserTable(PostgresTable):
   >>>
-  >>>     db_name = 'my_pg_conn'
-  >>>     table_name = 'user'
+  >>>     db_name = "my_pg_conn"
+  >>>     table_name = "user"
 
 
 Model a row:
@@ -61,13 +72,13 @@ Model a row:
   >>>     age = Integer()
 
 
-Insert a row:
+Create and insert a row:
 
 .. code-block:: python
 
   >>> user = User.construct(
-  >>>     first_name='john', last_name='cleese',
-  >>>     email='foo@bar.com', age=50)
+  >>>     first_name="john", last_name="cleese",
+  >>>     email="foo@bar.com", age=50)
   >>>
   >>> user.save()
 
@@ -76,7 +87,7 @@ Fetch a row:
 
 .. code-block:: python
 
-  >>> user = User.fetch(email='foo@bar.com')
+  >>> user = User.fetch(email="foo@bar.com")
   >>> user.first_name, user.last_name
   ('john', 'cleese')
 
@@ -85,21 +96,21 @@ Update, find, delete:
 
 .. code-block:: python
 
-  >>> user = User.fetch(email='foo@bar.com')
+  >>> user = User.fetch(email="foo@bar.com")
   >>> user.age += 1
   >>> user.save()
   >>>
-  >>> [u.email for u in User.find_all(first_name='john')]
+  >>> [u.email for u in User.find_all(first_name="john")]
   ['foo@bar.com']
   >>>
   >>> user.delete()
 
 
-Consistent patterns, etc.
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Consistency
+~~~~~~~~~~~
 
-Use the same type-descriptors, connection registration, etc. for all the
-database drivers wrapped by Wallace. Compare Redis:
+The same type descriptors, connection registration, etc. are used for all the
+database drivers wrapped by Wallace. Compare a Redis model:
 
 .. code-block:: python
 
@@ -111,12 +122,12 @@ database drivers wrapped by Wallace. Compare Redis:
   >>> from wallace.config import get_app
   >>>
   >>> app = get_app()
-  >>> app.add_redis_connection('0.0.0.0', port=6379, name='my_redis_conn')
+  >>> app.add_redis_connection("0.0.0.0", port=6379, name="my_redis_conn")
   >>>
   >>> class WebSession(ExpiringRedisHash):
   >>>
-  >>>     db_name = 'my_redis_conn'
-  >>>     ttl = 60 * 60
+  >>>     db_name = "my_redis_conn"
+  >>>     ttl = 60*60
   >>>
   >>>     session_id = UUID(key=True, default=lambda: uuid.uuid4())
   >>>     created_at = Now()
@@ -129,39 +140,26 @@ database drivers wrapped by Wallace. Compare Redis:
   >>>         self.save()
 
 
-Fetch a connection
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: python
-
-  >>> from wallace.config import get_connection
-  >>>
-  >>> conn = get_connection('my_redis_conn')
-  >>> with conn.pipeline() as pipe:
-  >>>     pipe.rpush('mylist', 1)
-  >>>     pipe.rpush('mylist', 2)
-  >>>     pipe.rpush('mylist', 3)
-  >>>     pipe.execute()
-  >>>
-  >>> print conn.lpop('mylist')
-  1
-
-
 Create a custom type
 ~~~~~~~~~~~~~~~~~~~~
+
+Wallace "types" need not map directly to Python primitives. Build new ones
+ad hoc, particularly for cases requiring custom validation and to improve
+readability:
 
 .. code-block:: python
 
   >>> from wallace import RedisHash, String
   >>>
-  >>> SUITS = ("hearts", "spades", "diamonds", "clubs")
+  >>> suits = ("hearts", "spades", "diamonds", "clubs")
   >>>
   >>>
-  >>> def validate_cardrank(test_str):
-  >>>     if test_str.isdigit():
-  >>>         test_num = int(test_str)
-  >>>         return test_num > 1 and test_num < 10
-  >>>     return test_str in ("J", "Q", "K", "A")
+  >>> def validate_cardrank(cardrank):
+  >>>     if cardrank.isdigit():
+  >>>         cardrank = int(cardrank)
+  >>>         return cardrank > 1 and cardrank < 10
+  >>>     return cardrank in ("J", "Q", "K", "A")
+  >>>
   >>>
   >>> class CardRank(String):
   >>>
@@ -171,7 +169,8 @@ Create a custom type
   >>>
   >>> class PlayingCard(RedisHash):
   >>>
-  >>>     suit = String(validators=( lambda val: val in SUITS, ))
+  >>>     # validators can also be passed directly into the attribute
+  >>>     suit = String(validators=( lambda val: val in suits, ))
   >>>     rank = CardRank()
   >>>
   >>>     @property
