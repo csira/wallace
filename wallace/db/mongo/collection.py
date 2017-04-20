@@ -4,13 +4,13 @@ from wallace.errors import DoesNotExist
 
 class _Database(object):
 
-    def __get__(self, inst, owner):
+    def __get__(self, _, owner):
         return owner.db[owner.database_name]
 
 
 class _Collection(object):
 
-    def __get__(self, inst, owner):
+    def __get__(self, _, owner):
         return owner.database[owner.collection_name]
 
 
