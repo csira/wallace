@@ -15,12 +15,12 @@ Wallace
 =======
 
 Wallace is a Python API for modeling data.
-It was designed to sit in the space between direct database access -
-``data = redis.Redis().hgetall("foo")`` - and full ORMs.
 Use it to construct, manage, and manipulate domain models consistently for
 the PostgreSQL_ (psycopg_), Redis_ (redispy_), and MongoDB_ (pymongo_) database
 adaptors, without abstracting away performance considerations or making
 assumptions about underlying data storage.
+It was designed to sit in the space between direct database access and
+industrial strength ORMs.
 
 **Please note:** version 0.9.* is a breaking change, freeze 0.0.9 in your pip reqs file if your code relies on it. ``wallace==0.0.9``
 
@@ -30,7 +30,7 @@ Basic SQL Example
 
 To use Wallace while building your app there are only two requirements:
 set up database connections, and implement your models.
-As an additional step in the Postgres case, a representation for the table
+As an additional step for Postgres, a representation for the table
 is required, and likewise for a Mongo collection.
 
 Initialize the config and set up a connection:
@@ -109,7 +109,7 @@ Update, find, delete:
 Consistency
 ~~~~~~~~~~~
 
-The same type descriptors, connection registration, etc. are used for all the
+The same connection registration, type descriptors, etc. are used for all the
 database drivers wrapped by Wallace. Compare a Redis model:
 
 .. code-block:: python
