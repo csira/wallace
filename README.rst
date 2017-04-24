@@ -28,9 +28,9 @@ industrial strength ORMs.
 Basic SQL Example
 ~~~~~~~~~~~~~~~~~
 
-To use Wallace while building your app there are only two requirements:
+There are two requirements for using Wallace:
 set up database connections, and implement your models.
-As an additional step for Postgres, a representation for the table
+As an additional step for Postgres a representation for the table
 is required, and likewise for a Mongo collection.
 
 Initialize the config and set up a connection:
@@ -149,7 +149,7 @@ readability:
 
 .. code-block:: python
 
-  >>> from wallace import RedisHash, String
+  >>> from wallace import RedisHash, Boolean, String
   >>>
   >>> suits = ("hearts", "spades", "diamonds", "clubs")
   >>>
@@ -172,6 +172,7 @@ readability:
   >>>     # validators can also be passed directly into the attribute
   >>>     suit = String(validators=( lambda val: val in suits, ))
   >>>     rank = CardRank()
+  >>>     is_joker = Boolean()
   >>>
   >>>     @property
   >>>     def key(self):
