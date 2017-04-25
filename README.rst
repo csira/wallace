@@ -28,12 +28,7 @@ industrial strength ORMs.
 Basic SQL Example
 ~~~~~~~~~~~~~~~~~
 
-There are two requirements for using Wallace:
-set up database connections, and implement your models.
-As an additional step for Postgres a representation for the table
-is required, and likewise for a Mongo collection.
-
-Initialize the config and set up a connection:
+Beyond defining models Wallace has one requirement: configure database connections.
 
 .. code-block:: python
 
@@ -43,7 +38,8 @@ Initialize the config and set up a connection:
   >>> app.add_postgres_connection(<dbname>, <host>, <port>, name="my_pg_conn")
 
 
-Wrap the table:
+As an additional step for Postgres, a representation of the table is required.
+(Likewise for Mongo collections.)
 
 .. code-block:: python
 
@@ -55,7 +51,8 @@ Wrap the table:
   >>>     table_name = "user"
 
 
-Model a row:
+Postgres models require at least one attribute be labeled a primary key field with ``pk=True``.
+Note that the table is specified as well; calls to the database will be proxied through it.
 
 .. code-block:: python
 
@@ -72,7 +69,7 @@ Model a row:
   >>>     age = Integer()
 
 
-Create and insert a row:
+Use ``construct`` to create a new model instance and ``save`` to persist it:
 
 .. code-block:: python
 
@@ -83,7 +80,7 @@ Create and insert a row:
   >>> user.save()
 
 
-Fetch a row:
+Retrieve an existing row with ``fetch``, passing in the primary key fields:
 
 .. code-block:: python
 
