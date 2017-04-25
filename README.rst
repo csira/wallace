@@ -28,7 +28,7 @@ industrial strength ORMs.
 Basic SQL Example
 ~~~~~~~~~~~~~~~~~
 
-Beyond defining models Wallace has one requirement: configure database connections.
+Start using Wallace by configuring at least one database connection:
 
 .. code-block:: python
 
@@ -173,7 +173,7 @@ readability:
   >>>
   >>>     @property
   >>>     def key(self):
-  >>>         return "{}-of-{}".format(self.rank, self.suit)
+  >>>         return "joker" if self.is_joker else "{}-of-{}".format(self.rank, self.suit)
 
 
 Download and Install
