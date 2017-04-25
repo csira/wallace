@@ -17,17 +17,17 @@ def is_error_caught(err, func, *a, **kw):
 
 @register
 def delete():
-    assert Writer.delete() == ('DELETE FROM testtable', [])
-    assert Writer.delete(a=1) == ('DELETE FROM testtable WHERE a = %s', [1])
-    assert Writer.delete(a=1, b=2) == ('DELETE FROM testtable WHERE a = %s AND b = %s', [1, 2])
+    assert Writer.delete() == ('DELETE FROM testtable;', [])
+    assert Writer.delete(a=1) == ('DELETE FROM testtable WHERE a = %s;', [1])
+    assert Writer.delete(a=1, b=2) == ('DELETE FROM testtable WHERE a = %s AND b = %s;', [1, 2])
 
 
 @register
 def exists():
-    assert Writer.exists() == ('SELECT EXISTS(SELECT * FROM testtable)', [])
-    assert Writer.exists(a=1) == ('SELECT EXISTS(SELECT * FROM testtable WHERE a = %s)', [1])
-    assert Writer.exists(a=1, b=2) == ('SELECT EXISTS(SELECT * FROM testtable WHERE a = %s AND b = %s)', [1,2])
-    assert Writer.exists(columns=['foo'], a=1, b=2) == ('SELECT EXISTS(SELECT foo FROM testtable WHERE a = %s AND b = %s)', [1,2])
+    assert Writer.exists() == ('SELECT EXISTS(SELECT * FROM testtable);', [])
+    assert Writer.exists(a=1) == ('SELECT EXISTS(SELECT * FROM testtable WHERE a = %s);', [1])
+    assert Writer.exists(a=1, b=2) == ('SELECT EXISTS(SELECT * FROM testtable WHERE a = %s AND b = %s);', [1,2])
+    assert Writer.exists(columns=['foo'], a=1, b=2) == ('SELECT EXISTS(SELECT foo FROM testtable WHERE a = %s AND b = %s);', [1,2])
 
 
 @register
