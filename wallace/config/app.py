@@ -61,10 +61,7 @@ class App(object):
         return get_connection(name)
 
     @staticmethod
-    def add_postgres_connection(
-            database, host, port=5432,
-            name='default_pg', **kw):
-
+    def add_postgres_connection(database, host, port=5432, name='default_pg', **kw):
         from wallace.db import PostgresPool
         return PostgresPool.construct(
             name=name, database=database, host=host, port=port, **kw)

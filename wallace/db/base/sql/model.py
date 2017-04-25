@@ -86,8 +86,8 @@ class SqlModel(Model):
         return cls.construct(new=False, **row)
 
     @classmethod
-    def find_all(cls, **kwargs):
-        rows = cls.table.select(**kwargs)
+    def find_all(cls, **kw):
+        rows = cls.table.select(**kw)
         return [cls.construct(new=False, **row) for row in rows]
 
     @classmethod

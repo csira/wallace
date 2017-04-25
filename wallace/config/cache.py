@@ -1,6 +1,5 @@
 from wallace.errors import ConfigError
 
-
 _connection_cache = {}
 
 

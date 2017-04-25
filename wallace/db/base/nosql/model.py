@@ -12,6 +12,10 @@ class NoSqlBase(Base):
         if not is_found:
             cls._comb_superclasses(bases, dct)
 
+        # note to self: it's tempting to throw an error here if a key has not
+        # been found. don't - the key may be defined in a subclass.
+        # key existence is checked at runtime, in the model constructor
+
         return super(NoSqlBase, cls).__new__(cls, name, bases, dct)
 
     @staticmethod

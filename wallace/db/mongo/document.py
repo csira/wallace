@@ -7,8 +7,8 @@ class MongoDocument(NoSqlModel):
     collection = None
 
     @classmethod
-    def find_one(cls, **kwargs):
-        data = cls.collection.fetchall(**kwargs)
+    def find_one(cls, **kw):
+        data = cls.collection.fetchall(**kw)
         if not data:
             raise DoesNotExist(701)
         if len(data) != 1:
@@ -16,17 +16,17 @@ class MongoDocument(NoSqlModel):
         return cls.construct(new=False, **data[0])
 
     @classmethod
-    def find_all(cls, **kwargs):
-        docs = cls.collection.fetchall(**kwargs)
+    def find_all(cls, **kw):
+        docs = cls.collection.fetchall(**kw)
         return [cls.construct(new=False, **doc) for doc in docs]
 
 
     @classmethod
-    def construct(cls, _id=None, **kwargs):
+    def construct(cls, _id=None, **kw):
         f = super(MongoDocument, cls).construct
         if _id:
-            return f(key=_id, **kwargs)
-        return f(**kwargs)
+            return f(key=_id, **kw)
+        return f(**kw)
 
     @classmethod
     def exists(cls, **kw):

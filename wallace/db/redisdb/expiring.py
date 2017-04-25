@@ -13,6 +13,6 @@ class ExpiringRedisHash(RedisHash):
             raise ConfigError(801, 'int ttl >=1 required')
 
     def write_to_db(self, state, _, pipe=None):
-        with self._db_conn_manager(pipe) as pipe:
+        with self._pipe_manager(pipe) as pipe:
             super(ExpiringRedisHash, self).write_to_db(state, _, pipe=pipe)
             pipe.expire(self.key, self.ttl)

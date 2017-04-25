@@ -3,7 +3,7 @@ from wallace.config.app import get_app
 
 class GetApp(object):
 
-    def __get__(self, _, __):
+    def __get__(_, __, ___):
         return get_app()
 
 
