@@ -15,12 +15,12 @@ Wallace
 =======
 
 Wallace is a Python API for modeling data.
-Use it to construct, manage, and manipulate domain models consistently for
+Use it to construct, manage, and manipulate domain models for
 the PostgreSQL_ (psycopg_), Redis_ (redispy_), and MongoDB_ (pymongo_) database
-adaptors, without abstracting away performance considerations or making
-assumptions about underlying data storage.
+adaptors.
 It was designed to sit in the space between direct database access and
-industrial strength ORMs.
+industrial strength ORMs, without abstracting away performance considerations
+or making assumptions about underlying data storage.
 
 **Please note:** version 0.9.* is a breaking change, freeze 0.0.9 in your pip reqs file if your code relies on it. ``wallace==0.0.9``
 
@@ -51,8 +51,8 @@ As an additional step for Postgres, a representation of the table is required.
   >>>     table_name = "user"
 
 
-Postgres models require at least one attribute be labeled a primary key field with ``pk=True``.
-Note that the table is specified as well; calls to the database will be proxied through it.
+Postgres models require at least one attribute be labeled as a primary key field with ``pk=True``.
+Note that the table defined above is tied in as well; calls to the database will be proxied through it.
 
 .. code-block:: python
 
@@ -141,8 +141,7 @@ Create a custom type
 ~~~~~~~~~~~~~~~~~~~~
 
 Wallace "types" need not map directly to Python primitives. Build new ones
-ad hoc, particularly for cases requiring custom validation and to improve
-readability:
+ad hoc, particularly to improve readability:
 
 .. code-block:: python
 
