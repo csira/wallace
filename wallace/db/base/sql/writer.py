@@ -11,8 +11,8 @@ class QueryWriter(object):
             where_clause, values = self._build_clause(**kw)
             query = "DELETE FROM {} WHERE {};".format(self._table_name, where_clause)
         else:
-            # todo: should this throw an error instead? it's more appropiate to truncate
-            # the table, perhaps this is more likely than not to be a user error?
+            # The table prevents us from accidentally getting here.
+            # In practice the user should execute a truncate anyway.
             query = "DELETE FROM {};".format(self._table_name)
             values = []
 

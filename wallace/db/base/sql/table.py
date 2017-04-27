@@ -2,7 +2,7 @@ import functools
 
 from wallace.config import GetDBConn
 from wallace.db.base.sql.writer import QueryWriter
-from wallace.errors import DoesNotExist, SetupError, ValidationError
+from wallace.errors import DoesNotExist, SetupError, ValidationError, WallaceError
 
 
 def catch_missing_table_name(f):
@@ -29,6 +29,8 @@ class SqlTable(object):
     @classmethod
     @catch_missing_table_name
     def delete(cls, **kw):
+        if not kw:
+            raise WallaceError(410, "full table deletes are not supported.")
         q, vals = cls._query_writer.delete(**kw)
         cls.db.execute(q, vals)
 
