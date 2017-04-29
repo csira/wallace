@@ -56,13 +56,13 @@ class Model(object):
         return inst
 
     @classmethod
-    def construct(cls, new=True, **kwargs):
+    def construct(cls, new=True, **kw):
         if new:
             inst = cls.new()
-            inst.multiset(**kwargs)
+            inst.multiset(**kw)
         else:
             inst = cls()
-            inst._set_inbound_db_data(**kwargs)
+            inst._set_inbound_db_data(**kw)
         return inst
 
     @classmethod
@@ -95,10 +95,9 @@ class Model(object):
             data[attr] = None
         return data
 
-    def multiset(self, **kwargs):
-        for attr, val in kwargs.iteritems():
+    def multiset(self, **kw):
+        for attr, val in kw.iteritems():
             setattr(self, attr, val)
-        return self
 
 
     def _get_attr(self, attr):
@@ -130,7 +129,7 @@ class Model(object):
             self._cbs_deleted.add(attr)
 
 
-    def reload(self, **kw):
+    def refresh(self, **kw):
         self.pull(**kw)
 
     def pull(self, **kw):
