@@ -39,7 +39,95 @@ class Base(type):
         return the_class
 
 
-class Model(object):
+class ModelState(object):
+
+    def __init__(self):
+        self._cbs_db_data = dict()
+        self._cbs_updated = dict()
+        self._cbs_deleted = set()
+
+        self._cbs_is_new = False
+        self._cbs_is_db_data_inbound = False
+
+    @property
+    def is_new(self):
+        return self._cbs_is_new
+
+    @property
+    def is_modified(self):
+        return not self.is_new and (self._cbs_deleted or self._cbs_updated)
+
+    def is_attr_modified(self, attr):
+        return not self.is_new and (attr in self._cbs_deleted or attr in self._cbs_updated)
+
+    @property
+    def raw(self):
+        data = dict(self._cbs_db_data)
+        data.update(self._cbs_updated)
+        for attr in self._cbs_deleted:
+            data[attr] = None
+        return data
+
+    @property
+    def diff(self):
+        data = dict(self._cbs_updated)
+        for attr in self._cbs_deleted:
+            data[attr] = None
+        return data
+
+    def multiset(self, **kw):
+        for attr, val in kw.iteritems():
+            setattr(self, attr, val)
+
+    def rollback(self):
+        self._cbs_updated = dict()
+        self._cbs_deleted = set()
+
+    def _getattr(self, attr):
+        if attr in self._cbs_deleted:
+            return None
+        if attr in self._cbs_updated:
+            return self._cbs_updated[attr]
+        return self._cbs_db_data.get(attr)
+
+    def _setattr(self, attr, val):
+        if self._cbs_is_db_data_inbound:
+            self._cbs_db_data[attr] = val
+        else:
+            if val != self._cbs_db_data.get(attr):
+                self._cbs_updated[attr] = val
+            if attr in self._cbs_deleted:
+                self._cbs_deleted.remove(attr)
+
+    def _delattr(self, attr):
+        if attr in self._cbs_updated:
+            self._cbs_updated.pop(attr)
+        if not self.is_new and not self._cbs_is_db_data_inbound:
+            self._cbs_deleted.add(attr)
+
+    @contextmanager
+    def _protect_state(self):
+        state = self.raw
+        for attr in self._cbs_deleted:
+            state.pop(attr, None)
+
+        yield state, self.diff
+
+        self._cbs_db_data = state
+        self._cbs_is_new = False
+        self.rollback()
+
+    @contextmanager
+    def _inbound(self):
+        self._cbs_is_db_data_inbound = True
+        self.rollback()
+        try:
+            yield
+        finally:
+            self._cbs_is_db_data_inbound = False
+
+
+class Model(ModelState):
 
     __metaclass__ = Base
 
@@ -69,71 +157,17 @@ class Model(object):
             inst.multiset(**kw)
         else:
             inst = cls()
-            inst._set_inbound_db_data(**kw)
+            with inst._inbound():
+                inst.multiset(**kw)
         return inst
 
     @classmethod
     def exists(cls, **kw):
         raise NotImplementedError
 
+
     def __init__(self):
-        self._cbs_db_data = {}
-        self._cbs_deleted = set()
-        self._cbs_is_db_data_inbound = False
-        self._cbs_is_new = False
-        self._cbs_updated = {}
-
-    @property
-    def is_new(self):
-        return self._cbs_is_new
-
-    @property
-    def is_modified(self):
-        return not self.is_new and (self._cbs_deleted or self._cbs_updated)
-
-    def is_attr_modified(self, attr):
-        return not self.is_new and (attr in self._cbs_deleted or attr in self._cbs_updated)
-
-    @property
-    def raw(self):
-        data = dict(self._cbs_db_data)
-        data.update(self._cbs_updated)
-        for attr in self._cbs_deleted:
-            data[attr] = None
-        return data
-
-    def multiset(self, **kw):
-        for attr, val in kw.iteritems():
-            setattr(self, attr, val)
-
-
-    def _get_attr(self, attr):
-        if attr in self._cbs_deleted:
-            return None
-        if attr in self._cbs_updated:
-            return self._cbs_updated[attr]
-        return self._cbs_db_data.get(attr)
-
-    def _set_attr(self, attr, val):
-        if self._cbs_is_db_data_inbound:
-            self._cbs_db_data[attr] = val
-            if val == self._cbs_updated.get(attr):
-                self._cbs_updated.pop(attr)
-
-        else:
-            self._cbs_updated[attr] = val
-            if val == self._cbs_db_data.get(attr):
-                self._cbs_updated.pop(attr)
-
-            if attr in self._cbs_deleted:
-                self._cbs_deleted.remove(attr)
-
-    def _del_attr(self, attr):
-        if attr in self._cbs_updated:
-            self._cbs_updated.pop(attr)
-
-        if not self.is_new and not self._cbs_is_db_data_inbound:
-            self._cbs_deleted.add(attr)
+        super(Model, self).__init__()
 
 
     def refresh(self, **kw):
@@ -147,50 +181,22 @@ class Model(object):
         if not data:
             raise DoesNotExist(203)
 
-        self._set_inbound_db_data(**data)
+        with self._inbound():
+            self.multiset(**data)
 
     def read_from_db(self, **kw):
         raise NotImplementedError
-
 
     def save(self, **kw):
         self.push(**kw)
 
     def push(self, **kw):
-        with self._protect_internal_state() as (state, changes,):
+        with self._protect_state() as (state, changes,):
             self.write_to_db(state, changes, **kw)
-
-    @contextmanager
-    def _protect_internal_state(self):
-        state = dict(self._cbs_db_data)
-        state.update(self._cbs_updated)
-        changes = dict(self._cbs_updated)
-        for attr in self._cbs_deleted:
-            state.pop(attr, None)
-            changes[attr] = None
-
-        yield state, changes
-
-        self._cbs_db_data = state
-        self._cbs_is_new = False
-        self.rollback()
 
     def write_to_db(self, state, changes, **kw):
         raise NotImplementedError
 
-
-    def rollback(self):
-        self._cbs_deleted = set()
-        self._cbs_updated = {}
-
     def delete(self):
         if self.is_new:
             raise DoesNotExist(202, 'new model')
-
-
-    def _set_inbound_db_data(self, **kw):
-        self._cbs_is_db_data_inbound = True
-        try:
-            self.multiset(**kw)
-        finally:
-            self._cbs_is_db_data_inbound = False
