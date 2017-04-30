@@ -166,10 +166,6 @@ class Model(ModelState):
         raise NotImplementedError
 
 
-    def __init__(self):
-        super(Model, self).__init__()
-
-
     def refresh(self, **kw):
         self.pull(**kw)
 
