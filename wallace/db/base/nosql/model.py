@@ -1,5 +1,6 @@
 from wallace.db.base.attrs.base import DataType
-from wallace.db.base.model import Base, Model
+from wallace.db.base.model.base import Model
+from wallace.db.base.model.meta import Base
 from wallace.errors import DoesNotExist, SetupError, ValidationError
 
 
