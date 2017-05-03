@@ -6,8 +6,8 @@ class ExpiringRedisHash(RedisHash):
 
     ttl = None  # must explicitly set ttl
 
-    def __init__(self):
-        RedisHash.__init__(self)
+    def __init__(self, *a, **kw):
+        RedisHash.__init__(self, *a, **kw)
 
         if not isinstance(self.ttl, int) or self.ttl < 1:
             raise ConfigError(801, 'int ttl >=1 required')

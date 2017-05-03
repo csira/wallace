@@ -103,8 +103,8 @@ class NoSqlModel(Model):
 
     __metaclass__ = NoSqlBase
 
-    def __init__(self):
-        Model.__init__(self)
+    def __init__(self, *a, **kw):
+        Model.__init__(self, *a, **kw)
 
         if not hasattr(self, 'key'):
             raise SetupError(501)

@@ -30,16 +30,17 @@ def test_new(model):
 
 @register
 @_insert_model
-def test_construct_1(model):
-    inst = model.construct(new=True, a='abc')
-    assert inst._cbs_updated == {'a': 'abc', 'b': 'default'}
+def test_new_1(model):
+    inst = model.new()
+    inst.a = 'abc'
+    assert inst._state.updated_attrs == {'a': 'abc', 'b': 'default'}
 
 
 @register
 @_insert_model
 def test_construct_2(model):
-    inst = model.construct(new=False, a='abc')
-    assert inst._cbs_db_data == {'a': 'abc'}
+    inst = model.construct(a='abc')
+    assert inst._state.db_state == {'a': 'abc'}
 
 
 @register

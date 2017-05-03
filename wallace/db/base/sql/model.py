@@ -33,8 +33,8 @@ class SqlModel(Model):
 
     table = None
 
-    def __init__(self):
-        Model.__init__(self)
+    def __init__(self, *a, **kw):
+        Model.__init__(self, *a, **kw)
 
         if not self._cbs_primary_key_fields:
             raise SetupError(401, 'no primary key fields defined')
@@ -67,7 +67,7 @@ class SqlModel(Model):
 
         for attr in self._cbs_primary_key_fields:
             try:
-                val = self._cbs_db_data[attr]
+                val = self._state.db_state[attr]
             except KeyError:
                 raise ValidationError(404, 'null primary key field %s' % attr)
 

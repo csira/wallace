@@ -25,13 +25,15 @@ def test_set_none_is_delete():
     class TestModel(Model):
         my_val = String()
 
-    test = TestModel.construct(new=False, my_val='abc')
-    assert (test.my_val == 'abc' and test._cbs_db_data == {'my_val': 'abc'}
-        and test._cbs_deleted == set())
+    test = TestModel.construct(my_val='abc')
+    assert test.my_val == 'abc'
+    assert test._state.db_state == {'my_val': 'abc'}
+    assert test._state.deleted_attrs == set()
 
     test.my_val = None
-    assert (test.my_val is None and test._cbs_db_data == {'my_val': 'abc'}
-        and test._cbs_deleted == set(['my_val']))
+    assert test.my_val is None
+    assert test._state.db_state == {'my_val': 'abc'}
+    assert test._state.deleted_attrs == set(['my_val'])
 
 
 @register

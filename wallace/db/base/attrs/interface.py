@@ -7,10 +7,10 @@ class ModelInterface(object):
         self.default = default
 
     def __get__(self, inst, _):
-        return inst._getattr(self.attr)
+        return inst._state._getattr(self.attr)
 
     def __set__(self, inst, val):
-        inst._setattr(self.attr, val)
+        inst._state._setattr(self.attr, val)
 
     def __delete__(self, inst):
-        inst._delattr(self.attr)
+        inst._state._delattr(self.attr)
