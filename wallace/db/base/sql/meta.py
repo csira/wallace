@@ -6,12 +6,12 @@ from wallace.errors import ValidationError
 class SqlModelBase(Base):
 
     def __new__(cls, name, bases, dct):
-        fields = dct["_pk_fields"] = get_primary_key_fields(bases, dct)
-        dct["primary_key"] = PrimaryKey(fields)
+        fields = dct["_pk_fields"] = _get_primary_key_fields(bases, dct)
+        dct["primary_key"] = _PrimaryKey(fields)
         return super(SqlModelBase, cls).__new__(cls, name, bases, dct)
 
 
-class PrimaryKey(object):
+class _PrimaryKey(object):
     """
     The primary key as it is currently stored in the db. When a PK field changes,
     this continues to return the old value so the row can be found.
@@ -40,7 +40,7 @@ class PrimaryKey(object):
         return key
 
 
-def get_primary_key_fields(bases, dct):
+def _get_primary_key_fields(bases, dct):
     pk_fields = set()
 
     for base in bases:  # support model inheritance
