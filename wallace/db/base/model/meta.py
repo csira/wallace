@@ -1,6 +1,18 @@
 from wallace.db.base.attrs.base import DataType
 
 
+class Base(type):
+
+    def __new__(cls, name, bases, dct):
+        for key, val in dct.iteritems():
+            if isinstance(val, DataType):
+                val.attr = key
+
+        the_class = super(Base, cls).__new__(cls, name, bases, dct)
+        the_class._default_fields = _get_default_fields(bases, dct)
+        return the_class
+
+
 def _get_default_fields(bases, dct):
     """
     Find model attributes with default values. The metaclass below adds them
@@ -22,15 +34,3 @@ def _get_default_fields(bases, dct):
             defaults.pop(key)  # a default, but overridden here without one
 
     return tuple(defaults.items())
-
-
-class Base(type):
-
-    def __new__(cls, name, bases, dct):
-        for key, val in dct.iteritems():
-            if isinstance(val, DataType):
-                val.attr = key
-
-        the_class = super(Base, cls).__new__(cls, name, bases, dct)
-        the_class._default_fields = _get_default_fields(bases, dct)
-        return the_class
