@@ -18,7 +18,7 @@ def _insert_model(f):
 @register
 @_insert_model
 def test_default_discovery(model):
-    assert model._cbs_default_fields == (('a', ''), ('b', 'default'),)
+    assert model._default_fields == (('a', ''), ('b', 'default'),)
 
 
 @register
@@ -52,7 +52,7 @@ def test_inheritance_default_1():
     class Sub(TestModel):
         c = String(default='foo')
 
-    fields = sorted(Sub._cbs_default_fields)
+    fields = sorted(Sub._default_fields)
     assert fields == [('a', ''), ('b', 'default'), ('c', 'foo')]
 
 
@@ -66,5 +66,5 @@ def test_inheritance_default_2():
         b = String()
         c = String(default='foo')
 
-    fields = sorted(Sub._cbs_default_fields)
+    fields = sorted(Sub._default_fields)
     assert fields == [('a', ''), ('b', ''), ('c', 'foo')]

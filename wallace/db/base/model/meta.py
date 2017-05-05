@@ -12,7 +12,7 @@ def _get_default_fields(bases, dct):
     defaults = {}
 
     for base in bases:  # for model inheritance
-        for key, val in getattr(base, "_cbs_default_fields", []):
+        for key, val in getattr(base, "_default_fields", []):
             defaults[key] = val
 
     for key, val in dct.iteritems():
@@ -32,5 +32,5 @@ class Base(type):
                 val.attr = key
 
         the_class = super(Base, cls).__new__(cls, name, bases, dct)
-        the_class._cbs_default_fields = _get_default_fields(bases, dct)
+        the_class._default_fields = _get_default_fields(bases, dct)
         return the_class

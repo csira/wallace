@@ -13,7 +13,7 @@ class Model(object):
     def new(cls):
         inst = cls(_is_new=True)
 
-        for attr, default in cls._cbs_default_fields:
+        for attr, default in cls._default_fields:
             val = default() if callable(default) else default
             setattr(inst, attr, val)
 
