@@ -1,4 +1,4 @@
-from wallace.db.base.model.base import Model
+from wallace.db.base.model import Model
 from wallace.db.base.nosql.model import NoSqlModel
 from wallace.db.base.sql.model import SqlModel
 from wallace.db.base.sql.table import SqlTable
