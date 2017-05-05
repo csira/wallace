@@ -13,12 +13,12 @@ class MongoDocument(NoSqlModel):
             raise DoesNotExist(701)
         if len(data) != 1:
             raise ValidationError(702, 'expected a unique result')
-        return cls.construct(new=False, **data[0])
+        return cls.construct(**data[0])
 
     @classmethod
     def find_all(cls, **kw):
         docs = cls.collection.fetchall(**kw)
-        return [cls.construct(new=False, **doc) for doc in docs]
+        return [cls.construct(**doc) for doc in docs]
 
 
     @classmethod

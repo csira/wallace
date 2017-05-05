@@ -66,7 +66,7 @@ def fetch_without_key_without_property():
 @set_up_and_tear_down
 def fetch_without_key_with_property():
     model, key = _make_model_with_key()
-    inst = model.construct(new=False, test_int=123, test_str='abc')
+    inst = model.construct(test_int=123, test_str='abc')
     key = inst.key
     inst.pull()
     assert key == inst.key == 'abc|123'

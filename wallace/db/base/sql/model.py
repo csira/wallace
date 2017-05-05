@@ -83,12 +83,12 @@ class SqlModel(Model):
         if not kw:
             raise ValidationError(407)
         row = cls.table.find_one(**kw)
-        return cls.construct(new=False, **row)
+        return cls.construct(**row)
 
     @classmethod
     def find_all(cls, **kw):
         rows = cls.table.select(**kw)
-        return [cls.construct(new=False, **row) for row in rows]
+        return [cls.construct(**row) for row in rows]
 
     @classmethod
     def exists(cls, **kw):

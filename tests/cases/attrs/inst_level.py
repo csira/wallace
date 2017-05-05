@@ -42,7 +42,7 @@ def test_set_value_if_validator_fails():
     class TestModel(Model):
         my_val = String(validators=(lambda val: len(val) < 4,))
 
-    test = TestModel.construct(new=False, my_val='abc')
+    test = TestModel.construct(my_val='abc')
     test.my_val = 'abcd'
 
 

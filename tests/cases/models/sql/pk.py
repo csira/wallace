@@ -101,7 +101,7 @@ def test_compare_pk():
         table = MyTable
         field1 = String(pk=True)
 
-    inst = MyModel.construct(new=False, field1='abc')
+    inst = MyModel.construct(field1='abc')
     assert inst.primary_key == {'field1': 'abc'}
 
     inst.field1 = 'xyz'
@@ -120,7 +120,7 @@ def test_error_if_pk_field_missing():
         field2 = String(pk=True)
         field3 = String()
 
-    inst = MyModel.construct(new=False, field1='abc', field3='xyz')
+    inst = MyModel.construct(field1='abc', field3='xyz')
     inst.primary_key
 
 
@@ -135,7 +135,7 @@ def test_error_if_pk_field_empty_str():
         field1 = String(pk=True)
         field2 = String(pk=True)
 
-    inst = MyModel.construct(new=False, field1='abc', field2='')
+    inst = MyModel.construct(field1='abc', field2='')
     inst.primary_key
 
 
@@ -150,5 +150,5 @@ def test_error_if_pk_field_null():
         field1 = String(pk=True)
         field2 = String(pk=True)
 
-    inst = MyModel.construct(new=False, field1='abc', field2=None)
+    inst = MyModel.construct(field1='abc', field2=None)
     inst.primary_key
