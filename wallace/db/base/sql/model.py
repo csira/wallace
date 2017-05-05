@@ -9,7 +9,6 @@ class SqlModel(Model):
     __metaclass__ = SqlModelBase
 
     table = None
-    primary_key = None  # set up by the base
 
     def __init__(self, *a, **kw):
         Model.__init__(self, *a, **kw)
