@@ -33,7 +33,7 @@ def test_pk():
         field2 = String(pk=True)
         filed3 = String()
 
-    fields = sorted(list(MyModel._cbs_primary_key_fields))
+    fields = sorted(list(MyModel._pk_fields))
     assert fields == ['field1', 'field2']
 
 
@@ -52,7 +52,7 @@ def test_pks_trickle_down():
         field4 = String(pk=True)
         field5 = String()
 
-    fields = sorted(list(SubModel._cbs_primary_key_fields))
+    fields = sorted(list(SubModel._pk_fields))
     assert fields == ['field1', 'field2', 'field4']
 
 
@@ -72,7 +72,7 @@ def test_pks_override():
         field4 = String(pk=True)
         field5 = String()
 
-    fields = sorted(list(SubModel._cbs_primary_key_fields))
+    fields = sorted(list(SubModel._pk_fields))
     assert fields == ['field1', 'field4']
 
 
