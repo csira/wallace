@@ -1,5 +1,7 @@
 from contextlib import contextmanager
 
+from wallace.errors import WallaceError
+
 unknown_sentinel = object()
 
 
@@ -11,7 +13,7 @@ class ModelState(object):
         self.deleted_attrs = set()
 
         if is_new == unknown_sentinel or not isinstance(is_new, bool):
-            raise Exception("use Model.new to create a new model")
+            raise WallaceError("use Model.new to create a new model")
 
         self._is_new = is_new
         self._db_data_inbound = False
